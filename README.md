@@ -1,0 +1,72 @@
+# Docchi.pl Addon for Kodi
+
+![Version](https://img.shields.io/badge/version-2.2.0-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Status](https://img.shields.io/badge/status-Active-brightgreen.svg)
+
+<div align="center">
+  <img src="https://docchi.pl/static/img/logo.svg" alt="Docchi.pl Logo" width="300">
+</div>
+
+An addon for Kodi that allows users to watch anime with Polish subtitles from the [Docchi.pl](http://docchi.pl) site. This project is a port of mine **[original Stremio addon](https://github.com/skoruppa/docchi-stremio-addon)**, bringing its core logic to the Kodi platform.
+
+---
+
+## Key Features
+
+- **Access to Docchi.pl Catalogs**: Browse anime from the current season, view trending series, and see the latest released episodes.
+- **Rich Metadata from Kitsu**: All lists are enhanced with detailed information such as descriptions, ratings, premiere dates, genres, and posters thanks to integration with the Kitsu API.
+- **Detailed Episode Information**: The episode list includes individual titles, synopses, and thumbnails when available from Kitsu.
+- **Intelligent Caching**: The addon uses a local SQLite database to cache ID mappings and metadata, which drastically speeds up loading times on subsequent visits.
+
+## Installation
+
+1.  Download the repo as a ZIP file.
+3.  Open Kodi and navigate to: **Add-ons -> Box icon (Add-on browser)**.
+4.  Select **Install from zip file**.
+5.  Locate the `.zip` file you just downloaded and confirm the installation.
+6.  After a moment, the addon will be installed and available in **Add-ons -> Video add-ons**.
+
+## How It Works (Architecture)
+
+The addon uses a hybrid approach, combining data from two sources to provide the best possible user experience:
+
+- **Docchi.pl API**: Serves as the primary source of truth for which anime and episodes are available, and for fetching the list of stream links.
+- **Kitsu.io API**: Used to fetch all rich metadata—both for entire series (descriptions, genres, ratings, artwork) and for individual episodes (titles, synopses, thumbnails).
+- **Local Database (SQLite)**: The addon intelligently saves fetched metadata to a local database. This ensures that when you reopen a list, the data loads almost instantly without needing to query the APIs again.
+
+## Supported Players
+As the stream data needs to be extracted from web players, not all available players at dochi.pl are supported
+- **Uqload**
+- **CDA**
+- **OK.ru**
+- **VK.com**
+- **Sibnet.ru**
+- **Lycoris.cafe**
+- **Dailymotion**
+- **Google Drive**
+- **Rumble.com**
+- **Bigwarp.io**
+- **Lulustream**
+- **Streamhls.to**
+- **Streamtape.com**
+- **Vidtube.one**
+- **RPMHub**
+- **UPNS**
+- **MP4Upload**
+- **Filemoon**
+- **EarnVid**
+- **StreamUP**
+
+## Acknowledgements
+
+- **Original Stremio Addon**: The entire player resolver logic and general architecture was ported from the **[author's original project for Stremio](https://github.com/skoruppa/docchi-stremio-addon)**.
+- **The Kodi Community**: For creating open and flexible software.
+
+## Reporting Bugs
+
+If you encounter any issues, please report them in the [**Issues**](https://github.com/skoruppa/YOUR_REPONAME/issues) section of this repository. Include a snippet from your Kodi log to help diagnose the problem.
+
+## Support 🤝
+
+If you want to thank me for the addon, you can [buy me a coffe](https://buycoffee.to/skoruppa) 

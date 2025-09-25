@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.video.docchipl" name="Docchi.pl" version="0.1.3" provider-name="skoruppa">
+  <requires>
+    <import addon="xbmc.python" version="3.0.0"/>
+    <import addon="script.module.requests"/>
+    <import addon="script.module.beautifulsoup4"/>
+    <import addon="script.module.pycryptodome"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource" library="addon.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en_GB">Anime with Polish subtitles from Docchi.pl</summary>
+    <summary lang="pl_PL">Anime z polskimi napisami z serwisu Docchi.pl</summary>
+    <description lang="en_GB">Provides users with the possibility to watch anime with Polish subtitles based on data returned by Docchi.pl. This addon is a port of the Stremio addon and utilizes its core logic for fetching streams and metadata.</description>
+    <description lang="pl_PL">Umożliwia oglądanie anime z polskimi napisami, korzystając z danych serwisu Docchi.pl. Ten dodatek jest portem wtyczki dla Stremio i wykorzystuje jej główną logikę do pobierania streamów i metadanych.</description>
+    <disclaimer lang="en_GB">All content is provided by external sites.</disclaimer>
+    <disclaimer lang="pl_PL">Wszystkie materiały pochodzą z zewnętrznych serwisów.</disclaimer>
+    <platform>all</platform>
+    <license>MIT</license>
+    <assets>
+      <icon>resources/icon.png</icon>
+      <fanart>resources/fanart.jpg</fanart>
+    </assets>
+  </extension>
+</addon>
