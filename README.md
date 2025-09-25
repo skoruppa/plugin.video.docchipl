@@ -21,7 +21,8 @@ An addon for Kodi that allows users to watch anime with Polish subtitles from th
 
 ## Installation
 
-1.  Download the repo as a ZIP file.
+1.  Navigate to the [**Releases**](https://github.com/skoruppa/skoruppa/releases) section of this GitHub page.
+2.  Download the latest version of the addon as a `.zip` file (e.g., `plugin.video.docchipl-0.1.3.zip`).
 3.  Open Kodi and navigate to: **Add-ons -> Box icon (Add-on browser)**.
 4.  Select **Install from zip file**.
 5.  Locate the `.zip` file you just downloaded and confirm the installation.
@@ -65,7 +66,7 @@ As the stream data needs to be extracted from web players, not all available pla
 
 ## Reporting Bugs
 
-If you encounter any issues, please report them in the [**Issues**](https://github.com/skoruppa/YOUR_REPONAME/issues) section of this repository. Include a snippet from your Kodi log to help diagnose the problem.
+If you encounter any issues, please report them in the [**Issues**](https://github.com/skoruppa/plugin.video.docchipl/issues) section of this repository. Include a snippet from your Kodi log to help diagnose the problem.
 
 ## Support 🤝
 
