@@ -1,17 +1,14 @@
 import re
 import json
-import asyncio
-import aiohttp
-import sys
 import base64
+import requests
+import traceback
+import xbmc
 from urllib.parse import urlparse, parse_qs, urlencode
 from py_mini_racer import MiniRacer
 
-from app.players.test import run_tests
-from ..utils import get_random_agent
+from ..utils import get_random_agent, log
 from .utils import fetch_resolution_from_m3u8
-
-sys.setrecursionlimit(2000)
 
 
 
@@ -52,95 +49,71 @@ def _decode_player_and_get_stream(script_content: str) -> str | None:
         return None
 
 
-async def get_video_from_vidguard_player(player_url: str):
-    loop = asyncio.get_running_loop()
+def get_video_from_vidguard_player(player_url: str):
     try:
         parsed_url = urlparse(player_url)
         origin = f"{parsed_url.scheme}://{parsed_url.netloc}"
-
         headers = {
             "User-Agent": get_random_agent(),
             "Referer": origin + '/',
             "Origin": origin,
         }
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get(player_url, headers=headers, timeout=15) as response:
-                response.raise_for_status()
-                html_content = await response.text()
+        response = requests.get(player_url, headers=headers, timeout=15)
+        response.raise_for_status()
+        html_content = response.text
 
-            script_content = None
-            script_blocks = re.findall(r"<script[^>]*>(.*?)</script>", html_content, re.DOTALL)
+        script_content = None
+        script_blocks = re.findall(r"<script[^>]*>(.*?)</script>", html_content, re.DOTALL)
+        for block in script_blocks:
+            if 'ﾟωﾟ' in block:
+                script_content = block.strip()
+                break
+        if not script_content:
+            log("VidGuard Player Error: Could not find the obfuscated script.", xbmc.LOGWARNING)
+            return None, None, None
 
-            for block in script_blocks:
-                if 'ﾟωﾟ' in block:
-                    script_content = block.strip()
-                    break
+        raw_stream_url = _decode_player_and_get_stream(script_content)
+        if not raw_stream_url:
+            return None, None, None
 
-            if not script_content:
-                print("VidGuard Player Error: Could not find the obfuscated script containing 'ﾟωﾟ'.")
-                return None, None, None
-
-            raw_stream_url = await loop.run_in_executor(None, _decode_player_and_get_stream, script_content)
-
-            if not raw_stream_url:
-                print("VidGuard Player Error: Failed to decode stream URL from script.")
-                return None, None, None
-
-            parsed_stream_url = urlparse(raw_stream_url)
-            query_params = parse_qs(parsed_stream_url.query)
-
-            if 'sig' in query_params:
-                original_sig = query_params['sig'][0]
-
-                step1 = _decode_e(original_sig, 2)
-
-
-                padding_needed = len(step1) % 4
-                if padding_needed:
-                    step1 += '=' * (4 - padding_needed)
-
-                try:
-                    step2 = base64.b64decode(step1).decode('utf-8')
-                except Exception as e:
-                    print(f"VidGuard Base64 Decode Error: {e}")
-                    return None, None, None
-
-                if len(step2) < 10:
-                    print(f"VidGuard Error: Decoded string is too short: {step2}")
-                    return None, None, None
-
-                trimmed = step2[5:-5]
-                new_sig = _decode_f(trimmed)
-
-                query_params['sig'] = [new_sig]
-                new_query = urlencode(query_params, doseq=True)
-                final_stream_url = parsed_stream_url._replace(query=new_query).geturl()
-            else:
-                final_stream_url = raw_stream_url
-
-            stream_headers = {'request': headers}
-
-            quality = "unknown"
+        parsed_stream_url = urlparse(raw_stream_url)
+        query_params = parse_qs(parsed_stream_url.query)
+        if 'sig' in query_params:
+            original_sig = query_params['sig'][0]
+            step1 = _decode_e(original_sig, 2)
+            padding_needed = len(step1) % 4
+            if padding_needed: step1 += '=' * (4 - padding_needed)
             try:
-                fetched_quality = await fetch_resolution_from_m3u8(session, final_stream_url, headers)
-                if fetched_quality:
-                    quality = fetched_quality
+                step2 = base64.b64decode(step1).decode('utf-8')
             except Exception as e:
-                print(f"VidGuard Info: Could not fetch resolution. Reason: {e}")
+                log(f"VidGuard Base64 Decode Error: {e}", xbmc.LOGERROR)
+                return None, None, None
+            if len(step2) < 10:
+                return None, None, None
+            trimmed = step2[5:-5]
+            new_sig = _decode_f(trimmed)
+            query_params['sig'] = [new_sig]
+            new_query = urlencode(query_params, doseq=True)
+            final_stream_url = parsed_stream_url._replace(query=new_query).geturl()
+        else:
+            final_stream_url = raw_stream_url
 
-            return final_stream_url, quality, stream_headers
+        stream_headers = {'request': headers}
+        quality = fetch_resolution_from_m3u8(final_stream_url, headers) or "unknown"
 
+        return final_stream_url, quality, stream_headers
     except Exception as e:
-        print(f"VidGuard Player Error: Unexpected error: {e}")
+        log(f"VidGuard Player Error: Unexpected error: {e}", xbmc.LOGERROR)
+        log(traceback.format_exc(), xbmc.LOGERROR)
         return None, None, None
 
 
 
 if __name__ == '__main__':
-    # Poprawiony blok testowy
     from ._test_utils import run_tests
+
     urls_to_test = [
-        "https://vidguard.to/e/JzkPxzX4NpAObyd" # Zaktualizowany link, stary mógł wygasnąć
+        "https://vidguard.to/e/JzkPxzX4NpAObyd"
     ]
     run_tests(get_video_from_vidguard_player, urls_to_test)

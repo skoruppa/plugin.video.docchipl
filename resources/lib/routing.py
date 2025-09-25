@@ -143,7 +143,11 @@ def list_episodes(slug, kitsu_id, media_type):
         kitsu_meta = kitsu_episodes_map.get(ep_num)
         if kitsu_meta:
             attrs = kitsu_meta.get('attributes', {})
-            title = attrs.get('titles', {}).get('en_us') or attrs.get('titles', {}).get('ja_jp') or f"Odcinek {ep_num}"
+            kitsu_title = (attrs.get('titles') or {}).get('en_us') or (attrs.get('titles') or {}).get('en')
+            if kitsu_title:
+                title = f"{ep_num}. {kitsu_title}"
+            else:
+                title = f"Odcinek {ep_num}"
             li = xbmcgui.ListItem(label=title)
             infotag = li.getVideoInfoTag()
             infotag.setTitle(title)
