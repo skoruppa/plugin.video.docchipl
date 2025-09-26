@@ -22,7 +22,7 @@ kitsu_client = KitsuAPI()
 
 from .players import cda, okru, sibnet, dailymotion, vk, uqload, gdrive, streamtape, \
     lulustream, savefiles, rumble, bigwarpio, streamhls, vidtube, upn, mp4upload, \
-    earnvid, filemoon, streamup, lycoris
+    earnvid, filemoon, streamup, lycoris, vidguard
 
 PLAYER_MAPPING = {
     'cda': cda.get_video_from_cda_player, 'ok': okru.get_video_from_okru_player,
@@ -35,7 +35,8 @@ PLAYER_MAPPING = {
     'upn': upn.get_video_from_upn_player, 'upns': upn.get_video_from_upn_player, 'rpm': upn.get_video_from_upn_player,
     'rpmhub': upn.get_video_from_upn_player, 'mp4upload': mp4upload.get_video_from_mp4upload_player,
     'earnvid': earnvid.get_video_from_earnvid_player, 'filemoon': filemoon.get_video_from_filemoon_player,
-    'streamup': streamup.get_video_from_streamup_player, 'lycoris.cafe': lycoris.get_video_from_lycoris_player
+    'streamup': streamup.get_video_from_streamup_player, 'lycoris.cafe': lycoris.get_video_from_lycoris_player,
+    'vidguard': vidguard.get_video_from_vidguard_player
 }
 DEFAULT_PLAYER_MAPPING = {
     'savefiles.com': savefiles.get_video_from_savefiles_player,

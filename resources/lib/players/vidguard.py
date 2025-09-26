@@ -5,11 +5,9 @@ import requests
 import traceback
 import xbmc
 from urllib.parse import urlparse, parse_qs, urlencode
-from py_mini_racer import MiniRacer
 
 from ..utils import get_random_agent, log
 from .utils import fetch_resolution_from_m3u8
-
 
 
 def _decode_e(hex_string: str, key: int) -> str:
@@ -32,20 +30,59 @@ def _decode_f(s: str) -> str:
 
 def _decode_player_and_get_stream(script_content: str) -> str | None:
     try:
-        ctx = MiniRacer()
-        ctx.eval("var window = {};")
-        ctx.eval(script_content)
-        svg_object_json_string = ctx.eval("JSON.stringify(window.svg)")
-        if not svg_object_json_string:
-            print("VidGuard Player Error: 'window.svg' object not found after JS execution.")
-            return None
-        svg_object = json.loads(svg_object_json_string)
-        if svg_object and isinstance(svg_object, dict) and 'stream' in svg_object:
-            return svg_object['stream']
-        print("VidGuard Player Error: 'stream' key not found in 'window.svg' object.")
-        return None
+        replacements = {
+            "((ﾟｰﾟ)+(ﾟｰﾟ)+(ﾟΘﾟ))": "9", "((o^_^o)+(o^_^o))": "6",
+            "((o^_^o)-(ﾟΘﾟ))": "2", "((ﾟｰﾟ)+(o^_^o))": "7",
+            "((ﾟｰﾟ)+(ﾟΘﾟ))": "5", "((ﾟｰﾟ)+(ﾟｰﾟ))": "8",
+            "(o^_^o)": "3", "(ﾟｰﾟ)": "4", "(ﾟΘﾟ)": "1",
+            "(c^_^o)": "0", "(ღ^_^o)": "0"
+        }
+        sorted_map = sorted(replacements.items(), key=lambda item: len(item[0]), reverse=True)
+
+        processed_code = script_content.strip()[33:-2]
+        processed_code = processed_code.replace(r'\u002b', '+').replace(r'\u0027', "'").replace(r'\/', '/')
+        processed_code = processed_code.replace(r'\n', '').replace(r'\\\u0022', '\\"')
+
+        start_marker = "(ﾟɆﾟ)['_']((ﾟɆﾟ)['_']("
+        end_marker = "))('_');"
+        start_index = processed_code.find(start_marker)
+        if start_index == -1: raise ValueError("Nie znaleziono znacznika początku.")
+        start_index += len(start_marker)
+        end_index = processed_code.rfind(end_marker, start_index)
+        if end_index == -1: raise ValueError("Nie znaleziono znacznika końca.")
+        payload = processed_code[start_index:end_index]
+
+        payload = re.sub(r'\s+', '', payload)
+        for search, replace in sorted_map:
+            payload = payload.replace(search, replace)
+
+        def octal_replacer(match):
+            num_block = match.group(1)
+            octal_string = "".join(filter(str.isdigit, num_block))
+            return chr(int(octal_string, 8)) if octal_string else ""
+
+        decoded_with_junk = re.sub(
+            r"\(ﾟɆﾟ\)\[ﾟεﾟ\]\+([0-9\+]+)",
+            octal_replacer,
+            payload
+        )
+
+        json_start_index = decoded_with_junk.find('{')
+        if json_start_index == -1:
+            raise ValueError("Nie znaleziono obiektu JSON w zdekodowanym kodzie.")
+
+        json_end_index = decoded_with_junk.rfind('}')
+        if json_end_index == -1:
+            raise ValueError("Nie znaleziono końca obiektu JSON.")
+
+        json_string = decoded_with_junk[json_start_index: json_end_index + 1]
+        svg_object = json.loads(json_string)
+
+        return svg_object.get('stream')
+
     except Exception as e:
-        print(f"VidGuard Player Error: An exception occurred during JS execution: {e}")
+        log(f"VidGuard Player Decode Error: {e}", xbmc.LOGERROR)
+        log(traceback.format_exc(), xbmc.LOGERROR)
         return None
 
 
@@ -107,7 +144,6 @@ def get_video_from_vidguard_player(player_url: str):
         log(f"VidGuard Player Error: Unexpected error: {e}", xbmc.LOGERROR)
         log(traceback.format_exc(), xbmc.LOGERROR)
         return None, None, None
-
 
 
 if __name__ == '__main__':
