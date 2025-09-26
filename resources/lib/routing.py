@@ -100,7 +100,6 @@ def list_anime(catalog_id):
                     details = docchi_client.get_anime_details(slug)
                     if details and details.get('mal_id'):
                         item['mal_id'] = details['mal_id']
-                        item['series_type'] = details['series_type']
                         item['series_type'] = details.get('series_type')
                         return item
                 except Exception as e:
