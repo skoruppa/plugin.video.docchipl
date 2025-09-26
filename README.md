@@ -1,6 +1,6 @@
 # Docchi.pl Addon for Kodi
 
-![Version](https://img.shields.io/badge/version-2.2.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.1.4-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Status](https://img.shields.io/badge/status-Active-brightgreen.svg)
 
@@ -8,7 +8,7 @@
   <img src="https://docchi.pl/static/img/logo.svg" alt="Docchi.pl Logo" width="300">
 </div>
 
-An addon for Kodi that allows users to watch anime with Polish subtitles from the [Docchi.pl](http://docchi.pl) site. This project is a port of mine **[original Stremio addon](https://github.com/skoruppa/docchi-stremio-addon)**, bringing its core logic to the Kodi platform.
+An addon for Kodi that allows users to watch anime with Polish subtitles from the [**Docchi.pl**](http://docchi.pl) site. This project is a port of mine **[original Stremio addon](https://github.com/skoruppa/docchi-stremio-addon)**, bringing its core logic to the Kodi platform.
 
 ---
 
@@ -22,7 +22,7 @@ An addon for Kodi that allows users to watch anime with Polish subtitles from th
 ## Installation
 
 1.  Navigate to the [**Releases**](https://github.com/skoruppa/skoruppa/releases) section of this GitHub page.
-2.  Download the latest version of the addon as a `.zip` file (e.g., `plugin.video.docchipl-0.1.3.zip`).
+2.  Download the latest version of the addon as a `.zip` file (e.g., `plugin.video.docchipl-0.1.4.zip`).
 3.  Open Kodi and navigate to: **Add-ons -> Box icon (Add-on browser)**.
 4.  Select **Install from zip file**.
 5.  Locate the `.zip` file you just downloaded and confirm the installation.
@@ -37,7 +37,7 @@ The addon uses a hybrid approach, combining data from two sources to provide the
 - **Local Database (SQLite)**: The addon intelligently saves fetched metadata to a local database. This ensures that when you reopen a list, the data loads almost instantly without needing to query the APIs again.
 
 ## Supported Players
-As the stream data needs to be extracted from web players, not all available players at dochi.pl are supported
+As the stream data needs to be extracted from web players, not all available players at Docchi.pl are supported
 - **Uqload**
 - **CDA**
 - **OK.ru**
