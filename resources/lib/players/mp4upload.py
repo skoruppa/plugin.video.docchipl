@@ -18,8 +18,11 @@ def get_video_from_mp4upload_player(player_url: str):
         height_match = re.search(r"embed:\s*'[^']*?\bHEIGHT=(\d+)", html_content)
         if height_match:
             quality = f"{height_match.group(1)}p"
-            
-        stream_headers = {'request': headers}
+
+        kodi_params = headers.copy()
+        kodi_params['verifypeer'] = 'false'  # Ignore SSL
+
+        stream_headers = {'request': kodi_params}
         return stream_url, quality, stream_headers
     except Exception as e:
         print(f"MP4Upload Player Error: Unexpected Error: {e}")
@@ -27,9 +30,8 @@ def get_video_from_mp4upload_player(player_url: str):
     
 
 if __name__ == '__main__':
-    # Poprawiony blok testowy
     from ._test_utils import run_tests
     urls_to_test = [
-        "https://www.mp4upload.com/embed-dmqiqj4mw6at.html",
+        "https://www.mp4upload.com/embed-mhcydywd0i83.html",
     ]
     run_tests(get_video_from_mp4upload_player, urls_to_test)
