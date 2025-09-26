@@ -101,6 +101,7 @@ def list_anime(catalog_id):
                     if details and details.get('mal_id'):
                         item['mal_id'] = details['mal_id']
                         item['series_type'] = details['series_type']
+                        item['series_type'] = details.get('series_type')
                         return item
                 except Exception as e:
                     log(f"Could not fetch details for trending slug {slug}: {e}", xbmc.LOGWARNING)
@@ -168,7 +169,7 @@ def list_episodes(slug, kitsu_id, media_type):
         else:
             infotag.setMediaType('episode')
         li.setProperty('IsPlayable', 'true')
-        url = build_url({'mode': 'list_streams', 'slug': slug, 'episode': ep_num})
+        url = build_url({'mode': 'list_streams', 'slug': slug, 'episode': ep_num, 'title': title})
         xbmcplugin.addDirectoryItem(handle=ADDON_HANDLE, url=url, listitem=li, isFolder=True)
     xbmcplugin.endOfDirectory(ADDON_HANDLE)
 
@@ -181,8 +182,9 @@ def _get_stream_priority(stream):
     return 1
 
 
-def list_streams(slug, episode):
-    xbmcplugin.setPluginCategory(ADDON_HANDLE, "Źródła")
+def list_streams(slug, episode, title):
+    xbmcplugin.setPluginCategory(ADDON_HANDLE, title)
+
     players = docchi_client.get_episode_players(slug, episode)
     if not players:
         xbmcgui.Dialog().notification("Brak źródeł", "Nie znaleziono odtwarzaczy.", xbmc.NOTIFICATION_INFO)
@@ -326,7 +328,7 @@ def router():
     elif mode == 'list_episodes':
         list_episodes(params.get('slug'), params.get('kitsu_id'), params.get('media_type'))
     elif mode == 'list_streams':
-        list_streams(params.get('slug'), params.get('episode'))
+        list_streams(params.get('slug'), params.get('episode'), params.get('title'))
     elif mode == 'search':
         search()
     elif mode == 'display_search_results':
