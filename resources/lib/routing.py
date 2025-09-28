@@ -104,7 +104,7 @@ def list_anime(catalog_id):
                         item['series_type'] = details.get('series_type')
                         return item
                 except Exception as e:
-                    log(f"Could not fetch details for trending slug {slug}: {e}", xbmc.LOGWARNING)
+                    log(f"Could not fetch details for trending slug {slug}: {e}", xbmcgui.NOTIFICATION_WARNING)
                 return None
 
             with ThreadPoolExecutor(max_workers=MAX_WORKERS_METADATA) as executor:
@@ -129,7 +129,7 @@ def list_episodes(slug, kitsu_id, media_type):
         log(f"Failed to fetch Docchi episodes for {slug}: {e}", xbmc.LOGERROR)
         docchi_episodes = []
     if not docchi_episodes:
-        xbmcgui.Dialog().notification("Informacja", "Brak dostępnych odcinków.", xbmc.NOTIFICATION_INFO)
+        xbmcgui.Dialog().notification("Informacja", "Brak dostępnych odcinków.", xbmcgui.NOTIFICATION_INFO)
         xbmcplugin.endOfDirectory(ADDON_HANDLE)
         return
     kitsu_episodes_map = {}
@@ -187,7 +187,7 @@ def list_streams(slug, episode, title):
 
     players = docchi_client.get_episode_players(slug, episode)
     if not players:
-        xbmcgui.Dialog().notification("Brak źródeł", "Nie znaleziono odtwarzaczy.", xbmc.NOTIFICATION_INFO)
+        xbmcgui.Dialog().notification("Brak źródeł", "Nie znaleziono odtwarzaczy.", xbmcgui.NOTIFICATION_INFO)
         return
 
     resolved_streams = []
@@ -200,12 +200,12 @@ def list_streams(slug, episode, title):
                     resolved_streams.append(result)
         except Exception:
             log(f"Stream extractor timed out after {STREAM_RESOLUTION_TIMEOUT}s. Some sources may be missing.",
-                xbmc.LOGWARNING)
+                xbmcgui.NOTIFICATION_WARNING)
 
     if not resolved_streams:
         xbmcgui.Dialog().notification("Brak źródeł",
                                       "Nie udało się przetworzyć żadnego odtwarzacza w wyznaczonym czasie.",
-                                      xbmc.LOGWARNING)
+                                      xbmcgui.NOTIFICATION_WARNING)
         return
 
     resolved_streams.sort(key=_get_stream_priority)
