@@ -2,6 +2,7 @@ import re
 import requests
 import json
 from ..utils import get_random_agent
+from .utils import fetch_resolution_from_m3u8
 
 
 def extract_ua_section(js_string):
@@ -49,31 +50,53 @@ def extract_ua_section(js_string):
 
 def get_video_from_rumble_player(url):
     headers = {"User-Agent": get_random_agent()}
-    stream_headers = None
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
         return None, None, None
     text = response.text
     json_pattern = re.compile(r'"ua":\{.*?\}\}\}\}', re.DOTALL)
     match = json_pattern.search(text)
+
     if not match:
         return None, None, None
+
     json_str = '{' + match.group(0) + '}'
     data = extract_ua_section(json_str)
+    stream_headers = {
+        'request': {
+            "Origin": "https://rumble.com/",
+            "Referer": "https://rumble.com/",
+            "User-Agent": headers['User-Agent']
+        }
+    }
+    video_sources = data.get('ua', {})
 
     highest_quality_url_string = ""
     video_data = None
-    if 'mp4' in data['ua'] and data['ua']['mp4']:
-        video_data = data['ua']['mp4']
+    if 'mp4' in video_sources and video_sources['mp4']:
+        video_data = video_sources['mp4']
         highest_quality_url_string = "?u=0&b=0"
-        stream_headers = {'request': {"Range": "bytes=0-", "Origin": "https://rumble.com/", "Referer": "https://rumble.com/", "User-Agent": headers['User-Agent']}}
-    elif 'tar' in data['ua'] and data['ua']['tar']:
-        video_data = data['ua']['tar']
-        stream_headers = {'request': {"Origin": "https://rumble.com/", "Referer": "https://rumble.com/", "User-Agent": headers['User-Agent']}}
+        stream_headers['request']["Range"] = "bytes=0-"
+        stream_headers['request']["Priority"] = "u=4"
+    elif 'hls' in video_sources and video_sources['hls']:
+        video_data = video_sources['hls']
+    elif 'tar' in video_sources and video_sources['tar']:
+        video_data = video_sources['tar']
+
     if not video_data:
         return None, None, None
 
-    highest_resolution = max(video_data.keys(), key=lambda res: int(res))
+    if 'auto' in video_data:
+        highest_resolution = 'auto'
+    else:
+        highest_resolution = max(video_data.keys(), key=lambda res: int(res))
+
     highest_quality_url = video_data[highest_resolution]['url'].replace('\\/', '/')
+
     highest_quality_url += highest_quality_url_string
-    return highest_quality_url, f"{highest_resolution}p", stream_headers
+    if highest_resolution == 'auto':
+        highest_resolution = fetch_resolution_from_m3u8(highest_quality_url, stream_headers['request'])
+    else:
+        highest_resolution = f"{highest_resolution}p"
+
+    return highest_quality_url, highest_resolution, stream_headers
