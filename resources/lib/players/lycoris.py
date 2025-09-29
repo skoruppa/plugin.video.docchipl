@@ -96,12 +96,12 @@ def get_highest_quality(video_links):
     filtered_links = {k: v for k, v in video_links.items() if k in quality_map}
 
     if not filtered_links:
-        return None, None, None
+        return None, None
 
     highest_quality = max(filtered_links.keys(), key=lambda q: quality_map.get(q, 0))
     highest_resolution = f"{quality_map[highest_quality]}p"
 
-    return filtered_links[highest_quality], highest_resolution, None
+    return filtered_links[highest_quality], highest_resolution
 
 
 def get_video_from_lycoris_player(url: str):
@@ -132,7 +132,7 @@ def get_video_from_lycoris_player(url: str):
                         video_link = fetch_and_decode_video(session, highest_quality['url'], is_secondary=False)
                         return video_link, highest_quality['quality'], None
                 else:
-                    video_url, quality, _ = get_highest_quality(video_links)
+                    video_url, quality = get_highest_quality(video_links)
 
                     if video_url:
                         status = check_url_status(video_url)
