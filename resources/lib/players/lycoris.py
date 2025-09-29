@@ -8,8 +8,6 @@ import xbmc
 from .rumble import get_video_from_rumble_player
 
 headers = {"User-Agent": get_random_agent()}
-GET_SECONDARY_URL = "https://www.lycoris.cafe/api/watch/getSecondaryLink"
-GET_LINK_URL = "https://www.lycoris.cafe/api/watch/getLink"
 
 
 def check_url_status(url, timeout=10):
@@ -34,76 +32,6 @@ def check_url_status(url, timeout=10):
         return None
 
 
-def decode_video_links(encoded_url):
-    if not encoded_url:
-        return None
-
-    # Check for our signature
-    if not encoded_url.endswith('LC'):
-        return encoded_url
-
-    # Remove signature
-    encoded_url = encoded_url[:-2]
-
-    try:
-        # Reverse the scrambling
-        decoded = ''.join(
-            chr(ord(char) - 7)  # Shift back
-            for char in reversed(encoded_url)  # Reverse back
-        )
-
-        # Decode base64
-        base64_decoded = base64.b64decode(decoded).decode('utf-8')
-        try:
-            data = json.loads(base64_decoded)  # Próba załadowania ciągu jako JSON
-            return data  # Jeśli nie wystąpi wyjątek, to JSON jest poprawny
-        except json.JSONDecodeError:
-            return base64_decoded
-    except Exception as error:
-        print(f"Error decoding URL: {error}")
-        return None
-
-
-def fetch_and_decode_video(session: requests.Session, episode_id: str, is_secondary: bool = False):
-    GET_SECONDARY_URL = "https://www.lycoris.cafe/api/watch/getSecondaryLink"
-    GET_LINK_URL = "https://www.lycoris.cafe/api/watch/getLink"
-    try:
-        if not is_secondary:
-            converted_text = bytes(episode_id, "utf-8").decode("unicode_escape")
-            final_text = converted_text.encode("latin1").decode("utf-8")
-            params = {"link": final_text}
-            url = GET_LINK_URL
-        else:
-            params = {"id": episode_id}
-            url = GET_SECONDARY_URL
-
-        response = session.get(url, params=params, verify=False)
-        response.raise_for_status()
-        data = response.text
-        return decode_video_links(data)
-    except requests.exceptions.RequestException as e:
-        log(f"Lycoris request error: {e}", xbmc.LOGERROR)
-        return None
-
-
-def get_highest_quality(video_links):
-    quality_map = {
-        "SD": 480,
-        "HD": 720,
-        "FHD": 1080
-    }
-
-    filtered_links = {k: v for k, v in video_links.items() if k in quality_map}
-
-    if not filtered_links:
-        return None, None
-
-    highest_quality = max(filtered_links.keys(), key=lambda q: quality_map.get(q, 0))
-    highest_resolution = f"{quality_map[highest_quality]}p"
-
-    return filtered_links[highest_quality], highest_resolution
-
-
 def get_video_from_lycoris_player(url: str):
     try:
         session = requests.Session()
@@ -119,29 +47,26 @@ def get_video_from_lycoris_player(url: str):
         if script and script.string and "episodeInfo" in script.string:
             data = json.loads(script.string.strip())
             body = json.loads(data["body"])
-            
+
             highest_quality = None
-            if body['episodeInfo']['FHD']: highest_quality = {"url": body['episodeInfo']['FHD'], 'quality': '1080p'}
-            elif body['episodeInfo']['HD']: highest_quality = {"url": body['episodeInfo']['HD'], 'quality': '720p'}
-            elif body['episodeInfo']['SD']: highest_quality = {"url": body['episodeInfo']['SD'], 'quality': '480p'}
+            if body['episodeInfo']['primarySource']['FHD']:
+                highest_quality = {"url": body['episodeInfo']['primarySource']['FHD'], 'quality': 1080}
+            elif body['episodeInfo']['primarySource']['HD']:
+                highest_quality = {"url": body['episodeInfo']['primarySource']['HD'], 'quality': 720}
+            elif body['episodeInfo']['primarySource']['SD']:
+                highest_quality = {"url": body['episodeInfo']['primarySource']['SD'], 'quality': 480}
 
-            if body['episodeInfo']['id']:
-                video_links = fetch_and_decode_video(session, body['episodeInfo']['id'], is_secondary=True)
-                if not video_links:
-                    if highest_quality:
-                        video_link = fetch_and_decode_video(session, highest_quality['url'], is_secondary=False)
-                        return video_link, highest_quality['quality'], None
-                else:
-                    video_url, quality = get_highest_quality(video_links)
+            url_candidate, quality = highest_quality['url'], highest_quality['quality']
 
-                    if video_url:
-                        status = check_url_status(video_url)
-                        if status == 403:
-                            if body['episodeInfo']['rumbleLink']:
-                                return get_video_from_rumble_player(body['episodeInfo']['rumbleLink'])
-                            else:
-                                return None, None, None
-                        return video_url, quality, None
+            status = check_url_status(url_candidate)
+            if status != 200:
+                rumble_url = body['episodeInfo'].get('rumbleLink')
+                if rumble_url:
+                    rumble = get_video_from_rumble_player(rumble_url)
+                    return rumble
+                return None, None, None
+
+            return url_candidate, quality, None
 
         return None, None, None
     except Exception as e:
