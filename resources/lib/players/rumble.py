@@ -66,9 +66,10 @@ def get_video_from_rumble_player(url):
     if 'mp4' in data['ua'] and data['ua']['mp4']:
         video_data = data['ua']['mp4']
         highest_quality_url_string = "?u=0&b=0"
-        stream_headers = {'request': {"Range": "bytes=0-", "Referer": "https://rumble.com/", "User-Agent": headers['User-Agent']}}
+        stream_headers = {'request': {"Range": "bytes=0-", "Origin": "https://rumble.com/", "Referer": "https://rumble.com/", "User-Agent": headers['User-Agent']}}
     elif 'tar' in data['ua'] and data['ua']['tar']:
         video_data = data['ua']['tar']
+        stream_headers = {'request': {"Origin": "https://rumble.com/", "Referer": "https://rumble.com/", "User-Agent": headers['User-Agent']}}
     if not video_data:
         return None, None, None
 
