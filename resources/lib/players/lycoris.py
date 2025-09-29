@@ -5,10 +5,33 @@ from bs4 import BeautifulSoup
 import re
 from ..utils import get_random_agent, log
 import xbmc
+from rumble import get_video_from_rumble_player
 
 headers = {"User-Agent": get_random_agent()}
 GET_SECONDARY_URL = "https://www.lycoris.cafe/api/watch/getSecondaryLink"
 GET_LINK_URL = "https://www.lycoris.cafe/api/watch/getLink"
+
+
+def check_url_status(url, timeout=10):
+    try:
+        resp = requests.head(url, allow_redirects=True, timeout=timeout, verify=False)
+        if resp.status_code not in (405, 501):
+            return resp.status_code
+    except:
+        pass
+
+    try:
+        resp = requests.get(
+            url,
+            headers={"Range": "bytes=0-0"},
+            allow_redirects=True,
+            stream=True,
+            timeout=timeout,
+            verify=False
+        )
+        return resp.status_code
+    except:
+        return None
 
 
 def decode_video_links(encoded_url):
@@ -73,7 +96,7 @@ def get_highest_quality(video_links):
     filtered_links = {k: v for k, v in video_links.items() if k in quality_map}
 
     if not filtered_links:
-        return None, None
+        return None, None, None
 
     highest_quality = max(filtered_links.keys(), key=lambda q: quality_map.get(q, 0))
     highest_resolution = f"{quality_map[highest_quality]}p"
@@ -109,7 +132,17 @@ def get_video_from_lycoris_player(url: str):
                         video_link = fetch_and_decode_video(session, highest_quality['url'], is_secondary=False)
                         return video_link, highest_quality['quality'], None
                 else:
-                    return get_highest_quality(video_links)
+                    video_url, quality, _ = get_highest_quality(video_links)
+
+                    if video_url:
+                        status = check_url_status(video_url)
+                        if status == 403:
+                            if rumble_url:
+                                return get_video_from_rumble_player(rumble_url)
+                            else:
+                                return None, None, None
+                        return video_url, quality, None
+
         return None, None, None
     except Exception as e:
         log(f"Lycoris Player Error: {e}", xbmc.LOGERROR)
