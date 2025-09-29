@@ -39,7 +39,7 @@ def _decode_player_and_get_stream(script_content: str) -> str | None:
         }
         sorted_map = sorted(replacements.items(), key=lambda item: len(item[0]), reverse=True)
 
-        processed_code = script_content.strip()[33:-2]
+        processed_code = script_content.strip()
         processed_code = processed_code.replace(r'\u002b', '+').replace(r'\u0027', "'").replace(r'\/', '/')
         processed_code = processed_code.replace(r'\n', '').replace(r'\\\u0022', '\\"')
 
