@@ -43,8 +43,8 @@ def _decode_player_and_get_stream(script_content: str) -> str | None:
         processed_code = processed_code.replace(r'\u002b', '+').replace(r'\u0027', "'").replace(r'\/', '/')
         processed_code = processed_code.replace(r'\n', '').replace(r'\\\u0022', '\\"')
 
-        start_marker = "(ﾟɆﾟ)['_']((ﾟɆﾟ)['_']("
-        end_marker = "))('_');"
+        start_marker = "(ﾟɆﾟ)['_']((ﾟɆﾟ)['_'](ﾟεﾟ+(ﾟɆﾟ)[ﾟoﾟ]+"
+        end_marker = "(ﾟɆﾟ)[ﾟoﾟ])(ﾟΘﾟ))('_');"
         start_index = processed_code.find(start_marker)
         if start_index == -1: raise ValueError("Nie znaleziono znacznika początku.")
         start_index += len(start_marker)
