@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import re
 from ..utils import get_random_agent, log
 import xbmc
-from rumble import get_video_from_rumble_player
+from .rumble import get_video_from_rumble_player
 
 headers = {"User-Agent": get_random_agent()}
 GET_SECONDARY_URL = "https://www.lycoris.cafe/api/watch/getSecondaryLink"
@@ -137,8 +137,8 @@ def get_video_from_lycoris_player(url: str):
                     if video_url:
                         status = check_url_status(video_url)
                         if status == 403:
-                            if rumble_url:
-                                return get_video_from_rumble_player(rumble_url)
+                            if body['episodeInfo']['rumbleLink']:
+                                return get_video_from_rumble_player(body['episodeInfo']['rumbleLink'])
                             else:
                                 return None, None, None
                         return video_url, quality, None

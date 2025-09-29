@@ -15,7 +15,7 @@ ADDON = xbmcaddon.Addon()
 ADDON_HANDLE = int(sys.argv[1])
 BASE_URL = sys.argv[0]
 MAX_WORKERS_METADATA = 10
-STREAM_RESOLUTION_TIMEOUT = 4
+STREAM_RESOLUTION_TIMEOUT = 10
 
 docchi_client = DocchiAPI()
 kitsu_client = KitsuAPI()
@@ -104,7 +104,7 @@ def list_anime(catalog_id):
                         item['series_type'] = details.get('series_type')
                         return item
                 except Exception as e:
-                    log(f"Could not fetch details for trending slug {slug}: {e}", xbmcgui.NOTIFICATION_WARNING)
+                    log(f"Could not fetch details for trending slug {slug}: {e}", xbmc.LOGWARNING)
                 return None
 
             with ThreadPoolExecutor(max_workers=MAX_WORKERS_METADATA) as executor:
@@ -200,7 +200,7 @@ def list_streams(slug, episode, title):
                     resolved_streams.append(result)
         except Exception:
             log(f"Stream extractor timed out after {STREAM_RESOLUTION_TIMEOUT}s. Some sources may be missing.",
-                xbmcgui.NOTIFICATION_WARNING)
+                xbmc.LOGWARNING)
 
     if not resolved_streams:
         xbmcgui.Dialog().notification("Brak źródeł",
