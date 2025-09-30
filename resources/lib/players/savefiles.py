@@ -46,8 +46,22 @@ def get_video_from_savefiles_player(filelink: str):
             }
 
             try:
-                quality = fetch_resolution_from_m3u8(stream_url, stream_get_headers)
-                quality = f'{quality}' if quality else 'unknown'
+                if 'mp4' not in stream_url:
+                    quality = fetch_resolution_from_m3u8(stream_url, stream_get_headers)
+                    quality = f'{quality}' if quality else 'unknown'
+                else:
+                    quality = "unknown"
+                    label_match = re.search(r'label\s*:\s*"([^"]+)"', player_html_content, re.IGNORECASE)
+                    if label_match:
+                        label_string = label_match.group(1)
+
+                        resolution_match_xy = re.search(r'(\d+)x(\d{3,4})', label_string)
+                        if resolution_match_xy:
+                            quality = f"{resolution_match_xy.group(2)}p"
+                        else:
+                            resolution_match_p = re.search(r'\b(\d{3,4})[pP]\b', label_string)
+                            if resolution_match_p:
+                                quality = f"{resolution_match_p.group(1)}p"
             except Exception:
                 quality = "unknown"
 
