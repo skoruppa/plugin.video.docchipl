@@ -25,7 +25,9 @@ def get_video_from_gdrive_player(drive_url: str):
 
     response = requests.get(video_url, headers=headers)
     text = response.text
-    if not text.startswith("<!DOCTYPE html>"):
+    if 'Error 404 (Not Found)' in text:
+        return None, None, None
+    elif not text.startswith("<!DOCTYPE html>"):
         return video_url, "unknown", {'request': headers}
     soup = BeautifulSoup(text, "html.parser")
     quality = "unknown"
