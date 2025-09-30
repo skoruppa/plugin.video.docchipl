@@ -12,7 +12,7 @@ def get_video_from_savefiles_player(filelink: str):
         parsed_url = urlparse(filelink)
         base_domain = f"{parsed_url.scheme}://{parsed_url.netloc}"
         dl_url = f"{base_domain}/dl"
-        file_code = parsed_url.path.split('/')[-1]
+        file_code = parsed_url.path.split('/')[-1].split('.')[0]
 
         post_data = {
             'op': 'embed',
