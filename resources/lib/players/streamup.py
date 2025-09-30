@@ -3,8 +3,8 @@ import re
 import requests
 import json
 from urllib.parse import urlparse
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import unpad
+from Cryptodome.Cipher import AES
+from Cryptodome.Util.Padding import unpad
 from ..utils import get_random_agent
 from .utils import fetch_resolution_from_m3u8
 

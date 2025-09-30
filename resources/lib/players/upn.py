@@ -1,7 +1,7 @@
 import re
 import requests
 from urllib.parse import urlparse
-from Crypto.Cipher import AES
+from Cryptodome.Cipher import AES
 from ..utils import get_random_agent
 from .utils import fetch_resolution_from_m3u8
 

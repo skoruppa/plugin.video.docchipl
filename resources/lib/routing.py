@@ -166,9 +166,12 @@ def list_episodes(slug, kitsu_id, media_type):
             infotag.setEpisode(ep_num)
         if media_type == 'movie':
             infotag.setMediaType('movie')
+            xbmcplugin.setContent(ADDON_HANDLE, "movies")
         else:
             infotag.setMediaType('episode')
+            xbmcplugin.setContent(ADDON_HANDLE, "episodes")
         li.setProperty('IsPlayable', 'true')
+
         url = build_url({'mode': 'list_streams', 'slug': slug, 'episode': ep_num, 'title': title})
         xbmcplugin.addDirectoryItem(handle=ADDON_HANDLE, url=url, listitem=li, isFolder=True)
     xbmcplugin.endOfDirectory(ADDON_HANDLE)
@@ -213,10 +216,14 @@ def list_streams(slug, episode, title):
         label = f"[{stream['hosting'].upper()}] [{stream['quality']}] - {stream['translator']}"
         li = xbmcgui.ListItem(label=label)
         li.setProperty('IsPlayable', 'true')
+        if '.m3u8' in stream['url']:
+            li.setProperty("inputstream", "inputstream.adaptive")
+            li.setProperty("inputstream.adaptive.manifest_type", "hls")
         final_url = stream['url']
         if stream.get('headers') and stream['headers'].get('request'):
             final_url = f"{final_url}|{urlencode(stream['headers']['request'])}"
         xbmcplugin.addDirectoryItem(handle=ADDON_HANDLE, url=final_url, listitem=li, isFolder=False)
+    xbmcplugin.setContent(ADDON_HANDLE, "videos")
     xbmcplugin.endOfDirectory(ADDON_HANDLE)
 
 
@@ -234,6 +241,7 @@ def display_search_results(query):
     except Exception as e:
         log(f"Search failed for '{query}': {e}", xbmc.LOGERROR)
         anime_list = []
+    xbmcplugin.setContent(ADDON_HANDLE, "videos")
     _populate_anime_list_concurrently(anime_list)
 
 
