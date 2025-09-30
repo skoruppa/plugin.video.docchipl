@@ -298,6 +298,7 @@ def _populate_anime_list_concurrently(anime_list):
     for result in filter(None, results):
         url, li = result
         xbmcplugin.addDirectoryItem(handle=ADDON_HANDLE, url=url, listitem=li, isFolder=True)
+    xbmcplugin.setContent(ADDON_HANDLE, "tvshows")
     xbmcplugin.endOfDirectory(ADDON_HANDLE)
 
 
