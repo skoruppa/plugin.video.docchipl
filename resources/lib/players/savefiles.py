@@ -6,11 +6,12 @@ from .utils import fetch_resolution_from_m3u8
 
 
 def get_video_from_savefiles_player(filelink: str):
-    dl_url = "https://savefiles.com/dl"
     random_agent = get_random_agent()
 
     try:
         parsed_url = urlparse(filelink)
+        base_domain = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        dl_url = f"{base_domain}/dl"
         file_code = parsed_url.path.split('/')[-1]
 
         post_data = {
@@ -22,7 +23,7 @@ def get_video_from_savefiles_player(filelink: str):
         headers_post = {
             "User-Agent": random_agent,
             "Referer": filelink,
-            "Origin": "https://savefiles.com",
+            "Origin": base_domain,
             "Content-Type": "application/x-www-form-urlencoded"
         }
 
@@ -40,8 +41,8 @@ def get_video_from_savefiles_player(filelink: str):
 
             stream_get_headers = {
                 "User-Agent": random_agent,
-                "Referer": "https://savefiles.com/",
-                "Origin": "https://savefiles.com"
+                "Referer": f"{base_domain}/",
+                "Origin": base_domain
             }
 
             try:
@@ -54,7 +55,7 @@ def get_video_from_savefiles_player(filelink: str):
 
             return stream_url, quality, stream_headers
 
-    except (requests.exceptions.RequestException, AttributeError, ValueError, IndexError) as e:
+    except (requests.exceptions.RequestException, AttributeError, ValueError, IndexError, Exception):
         return None, None, None
 
 

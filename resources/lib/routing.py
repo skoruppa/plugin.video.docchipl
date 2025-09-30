@@ -21,7 +21,7 @@ docchi_client = DocchiAPI()
 kitsu_client = KitsuAPI()
 
 from .players import cda, okru, sibnet, dailymotion, vk, uqload, gdrive, streamtape, \
-    lulustream, savefiles, rumble, bigwarpio, streamhls, vidtube, upn, mp4upload, \
+    lulustream, savefiles, rumble, bigwarpio, vidtube, upn, mp4upload, \
     earnvid, filemoon, streamup, lycoris, vidguard
 
 PLAYER_MAPPING = {
@@ -39,9 +39,9 @@ PLAYER_MAPPING = {
     'vidguard': vidguard.get_video_from_vidguard_player, 'savefiles': savefiles.get_video_from_savefiles_player
 }
 DEFAULT_PLAYER_MAPPING = {
-    'savefiles.com': savefiles.get_video_from_savefiles_player,
+    'savefiles': savefiles.get_video_from_savefiles_player,
     'bigwarp': bigwarpio.get_video_from_bigwarp_player,
-    'streamhls': streamhls.get_video_from_streamhls_player
+    'streamhls': savefiles.get_video_from_savefiles_player
 }
 
 
