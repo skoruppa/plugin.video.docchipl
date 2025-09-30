@@ -5,7 +5,6 @@ import requests
 import traceback
 import xbmc
 from urllib.parse import urlparse, parse_qs, urlencode
-
 from ..utils import get_random_agent, log
 from .utils import fetch_resolution_from_m3u8
 
@@ -28,7 +27,7 @@ def _decode_f(s: str) -> str:
     return "".join(char_list)
 
 
-def _decode_player_and_get_stream(script_content: str) -> str | None:
+def _decode_player_and_get_stream(script_content):
     try:
         replacements = {
             "((ﾟｰﾟ)+(ﾟｰﾟ)+(ﾟΘﾟ))": "9", "((o^_^o)+(o^_^o))": "6",

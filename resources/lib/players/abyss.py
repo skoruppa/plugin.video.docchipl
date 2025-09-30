@@ -7,7 +7,7 @@ import xbmc
 from urllib.parse import quote
 from ..utils import get_random_agent, log
 
-def _extract_base64_from_obfuscated_js(obfuscated_code: str) -> str | None:
+def _extract_base64_from_obfuscated_js(obfuscated_code):
     try:
         array_match = re.search(r"=\s*(\[.*?\]);", obfuscated_code, re.DOTALL)
         if not array_match:
