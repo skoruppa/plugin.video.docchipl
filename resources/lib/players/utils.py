@@ -24,7 +24,7 @@ def unpack_js(encoded_js):
     decoded = re.sub(r'\b\w+\b', lookup, payload)
     return decoded.replace('\\', '')
 
-def fetch_resolution_from_m3u8(m3u8_url: str, headers: dict) -> str | None:
+def fetch_resolution_from_m3u8(m3u8_url, headers):
     try:
         response = requests.get(m3u8_url, headers=headers, timeout=10)
         response.raise_for_status()
