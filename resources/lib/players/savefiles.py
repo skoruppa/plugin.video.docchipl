@@ -1,63 +1,66 @@
 import re
 import requests
+from urllib.parse import urlparse
 from ..utils import get_random_agent
-from .utils import unpack_js, fetch_resolution_from_m3u8
+from .utils import fetch_resolution_from_m3u8
 
 
-def fix_m3u8_link(link: str) -> str:
-    param_order = ['t', 's', 'e', 'f']
-    params = re.findall(r'[?&]([^=]*)=([^&]*)', link)
+def get_video_from_savefiles_player(filelink: str):
+    dl_url = "https://savefiles.com/dl"
+    random_agent = get_random_agent()
 
-    param_dict = {}
-    extra_params = {}
-
-    for i, (key, value) in enumerate(params):
-        if not key:
-            if i < len(param_order):
-                param_dict[param_order[i]] = value
-        else:
-            extra_params[key] = value
-
-    extra_params['i'] = '0.0'
-    extra_params['sp'] = '0'
-
-    base_url = link.split('?')[0]
-
-    fixed_link = base_url + '?' + '&'.join(f"{k}={v}" for k, v in param_dict.items() if k in param_order)
-
-    if extra_params:
-        fixed_link += '&' + '&'.join(f"{k}={v}" for k, v in extra_params.items())
-
-    return fixed_link
-
-
-
-def get_video_from_savefiles_player(filelink):
-    headers = {"User-Agent": get_random_agent(), "Referer": "https://savefiles.com", "Origin": "https://savefiles.com"}
-    response = requests.get(filelink, headers=headers, timeout=30)
-    response.raise_for_status()
-    html_content = response.text
-
-    m3u8_match = ""
-    player_data = ""
     try:
-        if re.search(r"eval\(function\(p,a,c,k,e", html_content):
-            player_data = unpack_js(html_content)
-            m3u8_match = re.search(r"sources:\[\{file:\"([^\"]+)\"", player_data)
-            stream_url = fix_m3u8_link(m3u8_match.group(1))
-        else:
-            m3u8_match = re.search(r'sources: \[\{file:"(https?://[^"]+)"\}\]', html_content)
-            stream_url = m3u8_match.group(1)
-        if not m3u8_match or not stream_url:
-            print(html_content)
-            return None, None, None
-    except AttributeError:
+        parsed_url = urlparse(filelink)
+        file_code = parsed_url.path.split('/')[-1]
+
+        post_data = {
+            'op': 'embed',
+            'file_code': file_code,
+            'auto': '0'
+        }
+
+        headers_post = {
+            "User-Agent": random_agent,
+            "Referer": filelink,
+            "Origin": "https://savefiles.com",
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
+
+        with requests.Session() as session:
+            response = session.post(dl_url, data=post_data, headers=headers_post, timeout=30)
+            response.raise_for_status()
+            player_html_content = response.text
+
+            stream_url_match = re.search(r'sources:\s*\[{file:"([^"]+)"', player_html_content)
+
+            if not stream_url_match:
+                return None, None, None
+
+            stream_url = stream_url_match.group(1)
+
+            stream_get_headers = {
+                "User-Agent": random_agent,
+                "Referer": "https://savefiles.com/",
+                "Origin": "https://savefiles.com"
+            }
+
+            try:
+                quality = fetch_resolution_from_m3u8(stream_url, stream_get_headers)
+                quality = f'{quality}' if quality else 'unknown'
+            except Exception:
+                quality = "unknown"
+
+            stream_headers = {'request': stream_get_headers}
+
+            return stream_url, quality, stream_headers
+
+    except (requests.exceptions.RequestException, AttributeError, ValueError, IndexError) as e:
         return None, None, None
 
-    try:
-        quality = fetch_resolution_from_m3u8(stream_url, headers)
-        quality = f'{quality}' if quality else 'unknown'
-    except:
-        quality = 'unknown'
-    stream_headers = {'request': headers}
-    return stream_url, quality, stream_headers
+
+if __name__ == '__main__':
+    from ._test_utils import run_tests
+    urls_to_test = [
+        "https://savefiles.com/e/ko901kakbuho"
+    ]
+    run_tests(get_video_from_savefiles_player, urls_to_test)
