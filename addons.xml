@@ -27,11 +27,13 @@
   </extension>
 </addon>
 
-  <addon id="repository.docchipl" name="Docchipl Repo" version="0.2.0" provider-name="skoruppa">
+  <addon id="repository.docchipl" name="Docchipl Repo" version="0.1" provider-name="skoruppa">
     <extension point="xbmc.addon.repository" name="Docchipl Repo">
-        <info compressed="false">https://raw.githubusercontent.com/skoruppa/plugin.video.docchipl/gh-pages/addons.xml</info>
-        <checksum>https://raw.githubusercontent.com/skoruppa/plugin.video.docchipl/gh-pages/addons.xml.md5</checksum>
-        <datadir zip="true">https://raw.githubusercontent.com/skoruppa/plugin.video.docchipl/gh-pages/</datadir>
+        <dir minversion="19.0.0">
+            <info compressed="false">https://raw.githubusercontent.com/skoruppa/plugin.video.docchipl/gh-pages/addons.xml</info>
+            <checksum>https://raw.githubusercontent.com/skoruppa/plugin.video.docchipl/gh-pages/addons.xml.md5</checksum>
+            <datadir zip="true">https://raw.githubusercontent.com/skoruppa/plugin.video.docchipl/gh-pages/</datadir>
+        </dir>
     </extension>
     <extension point="xbmc.addon.metadata">
         <summary>Repozytorium dla wtyczki Docchipl</summary>
