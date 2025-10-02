@@ -100,9 +100,11 @@ jobs:
         <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         <addon id="repository.docchipl" name="Docchipl Repo" version="${{ env.VERSION }}" provider-name="skoruppa">
             <extension point="xbmc.addon.repository" name="Docchipl Repo">
-                <info compressed="false">https://raw.githubusercontent.com/${{ github.repository }}/gh-pages/addons.xml</info>
-                <checksum>https://raw.githubusercontent.com/${{ github.repository }}/gh-pages/addons.xml.md5</checksum>
-                <datadir zip="true">https://raw.githubusercontent.com/${{ github.repository }}/gh-pages/</datadir>
+                <dir minversion="19.0.0">
+                    <info compressed="false">https://raw.githubusercontent.com/${{ github.repository }}/gh-pages/addons.xml</info>
+                    <checksum>https://raw.githubusercontent.com/${{ github.repository }}/gh-pages/addons.xml.md5</checksum>
+                    <datadir zip="true">https://raw.githubusercontent.com/${{ github.repository }}/gh-pages/</datadir>
+                </dir>
             </extension>
             <extension point="xbmc.addon.metadata">
                 <summary>Repozytorium dla wtyczki Docchipl</summary>
