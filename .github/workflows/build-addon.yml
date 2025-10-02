@@ -102,6 +102,9 @@ jobs:
         REPO_ID="repository.docchipl"
         REPO_ZIP_NAME="${REPO_ID}-${{ env.REPO_VERSION }}.zip"
         
+        echo "Generating repository ZIP: $REPO_ZIP_NAME"
+        mkdir -p $REPO_ID
+        
         cat > ./${REPO_ID}/addon.xml <<- EOF
         <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         <addon id="repository.docchipl" name="Docchipl Repo" version="${{ env.REPO_VERSION }}" provider-name="skoruppa">
@@ -124,9 +127,7 @@ jobs:
         </addon>
         EOF
 
-        echo "Generating repository ZIP: $REPO_ZIP_NAME"
-        mkdir -p $REPO_ID
-        echo "$REPO_ADDON_XML_CONTENT" > ./${REPO_ID}/addon.xml
+        
         cp ../resources/icon.png ./${REPO_ID}/icon.png || echo "Repo icon not found."
         cp ../resources/fanart.jpg ./${REPO_ID}/fanart.jpg || echo "Repo fanart not found."
         zip -r $REPO_ZIP_NAME $REPO_ID
