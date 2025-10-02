@@ -90,7 +90,7 @@ jobs:
 
     - name: Update gh-pages repository
       run: |
-        git clone --depth 1 --branch gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+        git clone --depth 1 --branch gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} gh-pages
         cd gh-pages
         
         # POPRAWKA: Czyszczenie starych ZIP-ów wtyczki i repozytorium
