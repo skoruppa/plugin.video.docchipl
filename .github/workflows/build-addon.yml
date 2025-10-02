@@ -21,6 +21,11 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Configure Git
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
     - name: Set version (from tag or manual input)
       run: |
         if [[ "${{ github.ref_type }}" == "tag" ]]; then
@@ -43,8 +48,6 @@ jobs:
     - name: Commit updated files
       if: github.ref_type == 'tag'
       run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
         git add README.md addon.xml
         if git diff --staged --quiet; then
           echo "No changes to commit."
@@ -59,7 +62,7 @@ jobs:
         ADDON_ID="plugin.video.docchipl"
         ADDON_ZIP_NAME="${ADDON_ID}-${{ env.VERSION }}.zip"
         zip -r "$ADDON_ZIP_NAME" . -x ".git/*" ".github/*" "repository.*.zip"
-        echo "::set-output name=zip_name::$ADDON_ZIP_NAME"
+        echo "zip_name=$ADDON_ZIP_NAME" >> $GITHUB_OUTPUT
 
     - name: Create Test Release (on manual run)
       if: github.ref_type != 'tag'
@@ -83,8 +86,6 @@ jobs:
 
     - name: Update gh-pages repository
       run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
         git clone --depth 1 --branch gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} gh-pages
         cd gh-pages
         cp ../${{ steps.addon_zip.outputs.zip_name }} .
