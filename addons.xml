@@ -1,7 +1,6 @@
   <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
   <addons>
-  <?xml version="0.2.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.docchipl" name="Docchi.pl" version="0.2.0" provider-name="skoruppa">
+  <addon id="plugin.video.docchipl" name="Docchi.pl" version="0.2.0" provider-name="skoruppa">
   <requires>
     <import addon="xbmc.python" version="0.2.0"/>
     <import addon="script.module.requests"/>
@@ -28,23 +27,21 @@
   </extension>
 </addon>
 
-    <addon id="repository.docchipl"
-           name="Docchipl Repo"
-           version="0.2.0"
-           provider-name="skoruppa">
-      <extension point="xbmc.addon.repository" name="Docchipl Repo">
+  <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="repository.docchipl" name="Docchipl Repo" version="0.2.0" provider-name="skoruppa">
+    <extension point="xbmc.addon.repository" name="Docchipl Repo">
         <info compressed="false">https://raw.githubusercontent.com/skoruppa/plugin.video.docchipl/gh-pages/addons.xml</info>
         <checksum>https://raw.githubusercontent.com/skoruppa/plugin.video.docchipl/gh-pages/addons.xml.md5</checksum>
         <datadir zip="true">https://raw.githubusercontent.com/skoruppa/plugin.video.docchipl/gh-pages/</datadir>
-      </extension>
-      <extension point="xbmc.addon.metadata">
+    </extension>
+    <extension point="xbmc.addon.metadata">
         <summary>Repozytorium dla wtyczki Docchipl</summary>
         <description>Repozytorium instalacyjne dla dodatków od skoruppa.</description>
         <platform>all</platform>
         <assets>
-          <icon>icon.png</icon>
-          <fanart>fanart.jpg</fanart>
+            <icon>icon.png</icon>
+            <fanart>fanart.jpg</fanart>
         </assets>
-      </extension>
-    </addon>
+    </extension>
+</addon>
   </addons>
