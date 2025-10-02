@@ -118,6 +118,28 @@ jobs:
         EOF
 
         md5sum addons.xml | awk '{print $1}' > addons.xml.md5
+
+        cat > index.html <<- EOH
+        <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+        <html>
+        <head>
+         <title>Index of /</title>
+        </head>
+        <body>
+        <h1>Index of /</h1>
+        <table>
+        EOH
+        for filename in $(ls -1); do
+          if [[ "$filename" == *.zip || "$filename" == *.md5 || "$filename" == *.xml ]]; then
+            echo "<tr><td><a href=\"$filename\">$filename</a></td></tr>" >> index.html
+          fi
+        done
+        cat >> index.html <<- EOT
+        </table>
+        </body>
+        </html>
+        EOT
+
         git add .
         if git diff --staged --quiet; then
           echo "No changes in gh-pages to commit."
