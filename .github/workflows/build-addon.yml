@@ -65,7 +65,9 @@ jobs:
       run: |
         ADDON_ID="plugin.video.docchipl"
         ADDON_ZIP_NAME="${ADDON_ID}-${{ env.VERSION }}.zip"
-        zip -r "$ADDON_ZIP_NAME" . -x ".git/*" ".github/*" "repository.*.zip"
+        mkdir -p ${ADDON_ID}
+        rsync -a --exclude='.git' --exclude='.github' --exclude='repository.*.zip' --exclude="${ADDON_ID}" . ${ADDON_ID}/
+        zip -r "$ADDON_ZIP_NAME" ${ADDON_ID}
         echo "zip_name=$ADDON_ZIP_NAME" >> $GITHUB_OUTPUT
 
     - name: Create Test Release (on manual run)
