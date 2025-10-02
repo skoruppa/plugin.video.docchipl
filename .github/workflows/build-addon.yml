@@ -98,7 +98,7 @@ jobs:
         
         cat > ./${REPO_ID}/addon.xml <<- EOF
         <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-        <addon id="repository.docchipl" name="Docchipl Repo" version="${{ env.VERSION }}" provider-name="skoruppa">
+        <addon id="repository.docchipl" name="Docchipl Repo" version="0.1" provider-name="skoruppa">
             <extension point="xbmc.addon.repository" name="Docchipl Repo">
                 <dir minversion="19.0.0">
                     <info compressed="false">https://raw.githubusercontent.com/${{ github.repository }}/gh-pages/addons.xml</info>
