@@ -1,0 +1,110 @@
+name: Build and Release Kodi Addon & Repo
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Set version from tag
+      run: |
+        TAG_NAME=${GITHUB_REF#refs/tags/}
+        echo "VERSION=${TAG_NAME}" >> $GITHUB_ENV
+        echo "Tag detected: ${TAG_NAME}"
+
+    - name: Update addon.xml version
+      run: |
+        sed -i "s/version=\"[^\"]*\"/version=\"${{ env.VERSION }}\"/" addon.xml
+
+    - name: Update README.md version badge and zip example
+      run: |
+        sed -i "s|!\[Version\](https://img.shields.io/badge/version-[0-9\.]*-blue.svg)|![Version](https://img.shields.io/badge/version-${{ env.VERSION }}-blue.svg)|" README.md
+        sed -i "s|plugin.video.docchipl-[0-9\.]*\.zip|plugin.video.docchipl-${{ env.VERSION }}.zip|" README.md
+
+    - name: Commit updated files
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add README.md addon.xml
+        # Zacommituj tylko wtedy, gdy są jakieś zmiany
+        if git diff --staged --quiet; then
+          echo "No changes to commit."
+        else
+          git commit -m "chore: Update version to ${{ env.VERSION }} [skip ci]"
+          git push
+        fi
+
+    - name: Create Addon ZIP
+      id: addon_zip
+      run: |
+        ADDON_ID="plugin.video.docchipl"
+        ADDON_ZIP_NAME="${ADDON_ID}-${{ env.VERSION }}.zip"
+        # Spakuj zawartość do pliku ZIP, wykluczając pliki gita i inne paczki
+        zip -r "$ADDON_ZIP_NAME" . -x ".git/*" ".github/*" "repository.*.zip"
+        echo "::set-output name=zip_name::$ADDON_ZIP_NAME"
+
+    - name: Create GitHub Release and Upload Addon ZIP
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ github.ref_name }}
+        files: ${{ steps.addon_zip.outputs.zip_name }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Update gh-pages repository
+      run: |
+        # Konfiguracja użytkownika git
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+        git clone --depth 1 --branch gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} gh-pages
+
+        cd gh-pages
+
+        cp ../${{ steps.addon_zip.outputs.zip_name }} .
+
+        cat > addons.xml << EOF
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addons>
+$(cat ../addon.xml)
+
+  <addon id="repository.docchipl"
+         name="Docchipl Repo"
+         version="${{ env.VERSION }}"
+         provider-name="skoruppa">
+    <extension point="xbmc.addon.repository" name="Docchipl Repo">
+      <info compressed="false">https://raw.githubusercontent.com/${{ github.repository }}/gh-pages/addons.xml</info>
+      <checksum>https://raw.githubusercontent.com/${{ github.repository }}/gh-pages/addons.xml.md5</checksum>
+      <datadir zip="true">https://raw.githubusercontent.com/${{ github.repository }}/gh-pages/</datadir>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+      <summary>Repozytorium dla wtyczki Docchipl</summary>
+      <description>Repozytorium instalacyjne dla dodatków od skoruppa.</description>
+      <platform>all</platform>
+      <assets>
+        <icon>icon.png</icon>
+        <fanart>fanart.jpg</fanart>
+      </assets>
+    </extension>
+  </addon>
+</addons>
+EOF
+
+        md5sum addons.xml | awk '{print $1}' > addons.xml.md5
+
+        git add .
+        if git diff --staged --quiet; then
+          echo "No changes in gh-pages to commit."
+        else
+          git commit -m "repo: Add/update addon version ${{ env.VERSION }} [skip ci]"
+          git push
+        fi
