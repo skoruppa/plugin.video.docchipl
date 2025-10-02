@@ -1,5 +1,8 @@
 name: Build and Release Kodi Addon & Repo
 
+env:
+  REPO_VERSION: '1.0.0'
+
 on:
   push:
     tags:
@@ -90,15 +93,18 @@ jobs:
         git clone --depth 1 --branch gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} gh-pages
         cd gh-pages
         
+        # POPRAWKA: Czyszczenie starych ZIP-ów wtyczki i repozytorium
+        rm -f plugin.video.docchipl-*.zip
+        rm -f repository.docchipl-*.zip
+        
         cp ../${{ steps.addon_zip.outputs.zip_name }} .
 
         REPO_ID="repository.docchipl"
-        REPO_ZIP_NAME="${REPO_ID}-${{ env.VERSION }}.zip"
-        mkdir -p $REPO_ID
+        REPO_ZIP_NAME="${REPO_ID}-${{ env.REPO_VERSION }}.zip"
         
-        cat > ./${REPO_ID}/addon.xml <<- EOF
+        read -r -d '' REPO_ADDON_XML_CONTENT << EOF
         <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-        <addon id="repository.docchipl" name="Docchipl Repo" version="0.1" provider-name="skoruppa">
+        <addon id="repository.docchipl" name="Docchipl Repo" version="${{ env.REPO_VERSION }}" provider-name="skoruppa">
             <extension point="xbmc.addon.repository" name="Docchipl Repo">
                 <dir minversion="19.0.0">
                     <info compressed="false">https://raw.githubusercontent.com/${{ github.repository }}/gh-pages/addons.xml</info>
@@ -117,21 +123,21 @@ jobs:
             </extension>
         </addon>
         EOF
-        
-        cp ../resources/icon.png ./${REPO_ID}/icon.png || echo "Repo icon not found in resources/."
-        cp ../resources/fanart.jpg ./${REPO_ID}/fanart.jpg || echo "Repo fanart not found in resources/."
-        
+
+        echo "Generating repository ZIP: $REPO_ZIP_NAME"
+        mkdir -p $REPO_ID
+        echo "$REPO_ADDON_XML_CONTENT" > ./${REPO_ID}/addon.xml
+        cp ../resources/icon.png ./${REPO_ID}/icon.png || echo "Repo icon not found."
+        cp ../resources/fanart.jpg ./${REPO_ID}/fanart.jpg || echo "Repo fanart not found."
         zip -r $REPO_ZIP_NAME $REPO_ID
         rm -rf $REPO_ID
-
-        REPO_ADDON_XML=$(unzip -p $REPO_ZIP_NAME */addon.xml)
 
         cat > addons.xml <<- EOF
         <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         <addons>
           $(sed '/<?xml/d' ../addon.xml)
 
-          $(echo "${REPO_ADDON_XML}" | sed '/<?xml/d')
+          $(echo "${REPO_ADDON_XML_CONTENT}" | sed '/<?xml/d')
         </addons>
         EOF
 
