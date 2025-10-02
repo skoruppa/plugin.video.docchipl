@@ -90,8 +90,8 @@ jobs:
 
     - name: Update gh-pages repository
       run: |
-        git clone --depth 1 --branch gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} gh-pages-temp
-        cd gh-pages-temp
+        git clone --depth 1 --branch gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+        cd gh-pages
         
         # POPRAWKA: Czyszczenie starych ZIP-ów wtyczki i repozytorium
         rm -f plugin.video.docchipl-*.zip
@@ -102,7 +102,7 @@ jobs:
         REPO_ID="repository.docchipl"
         REPO_ZIP_NAME="${REPO_ID}-${{ env.REPO_VERSION }}.zip"
         
-        read -r -d '' REPO_ADDON_XML_CONTENT << EOF
+        cat > ./${REPO_ID}/addon.xml <<- EOF
         <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         <addon id="repository.docchipl" name="Docchipl Repo" version="${{ env.REPO_VERSION }}" provider-name="skoruppa">
             <extension point="xbmc.addon.repository" name="Docchipl Repo">
@@ -130,17 +130,17 @@ jobs:
         cp ../resources/icon.png ./${REPO_ID}/icon.png || echo "Repo icon not found."
         cp ../resources/fanart.jpg ./${REPO_ID}/fanart.jpg || echo "Repo fanart not found."
         zip -r $REPO_ZIP_NAME $REPO_ID
-        rm -rf $REPO_ID
 
         cat > addons.xml <<- EOF
         <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         <addons>
           $(sed '/<?xml/d' ../addon.xml)
 
-          $(echo "${REPO_ADDON_XML_CONTENT}" | sed '/<?xml/d')
+          $(sed '/<?xml/d' ./$REPO_ID/addon.xml)
         </addons>
         EOF
 
+        rm -rf $REPO_ID
         md5sum addons.xml | awk '{print $1}' > addons.xml.md5
 
         cat > index.html <<- EOH
