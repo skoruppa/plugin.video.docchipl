@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - '*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Test version number (e.g., 1.2.3-test)'
+        required: true
+        default: '0.0.1-manual-test'
 
 jobs:
   build:
@@ -15,11 +21,15 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Set version from tag
+    - name: Set version (from tag or manual input)
       run: |
-        TAG_NAME=${GITHUB_REF#refs/tags/}
-        echo "VERSION=${TAG_NAME}" >> $GITHUB_ENV
-        echo "Tag detected: ${TAG_NAME}"
+        if [[ "${{ github.ref_type }}" == "tag" ]]; then
+          VERSION=${GITHUB_REF#refs/tags/}
+        else
+          VERSION="${{ github.event.inputs.version }}"
+        fi
+        echo "VERSION=${VERSION}" >> $GITHUB_ENV
+        echo "Version set to: ${VERSION}"
 
     - name: Update addon.xml version
       run: |
@@ -31,6 +41,7 @@ jobs:
         sed -i "s|plugin.video.docchipl-[0-9\.]*\.zip|plugin.video.docchipl-${{ env.VERSION }}.zip|" README.md
 
     - name: Commit updated files
+      if: github.ref_type == 'tag'
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -50,7 +61,19 @@ jobs:
         zip -r "$ADDON_ZIP_NAME" . -x ".git/*" ".github/*" "repository.*.zip"
         echo "::set-output name=zip_name::$ADDON_ZIP_NAME"
 
-    - name: Create GitHub Release and Upload Addon ZIP
+    - name: Create Test Release (on manual run)
+      if: github.ref_type != 'tag'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ env.VERSION }}
+        name: Test Release v${{ env.VERSION }}
+        prerelease: true
+        files: ${{ steps.addon_zip.outputs.zip_name }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create Official Release (on tag push)
+      if: github.ref_type == 'tag'
       uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ github.ref_name }}
@@ -66,7 +89,6 @@ jobs:
         cd gh-pages
         cp ../${{ steps.addon_zip.outputs.zip_name }} .
 
-        # POPRAWKA: Użyto <<- zamiast << i dodano wcięcia do całego bloku
         cat > addons.xml <<- EOF
           <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
           <addons>
