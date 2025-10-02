@@ -35,7 +35,6 @@ jobs:
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         git add README.md addon.xml
-        # Zacommituj tylko wtedy, gdy są jakieś zmiany
         if git diff --staged --quiet; then
           echo "No changes to commit."
         else
@@ -48,7 +47,6 @@ jobs:
       run: |
         ADDON_ID="plugin.video.docchipl"
         ADDON_ZIP_NAME="${ADDON_ID}-${{ env.VERSION }}.zip"
-        # Spakuj zawartość do pliku ZIP, wykluczając pliki gita i inne paczki
         zip -r "$ADDON_ZIP_NAME" . -x ".git/*" ".github/*" "repository.*.zip"
         echo "::set-output name=zip_name::$ADDON_ZIP_NAME"
 
@@ -62,45 +60,41 @@ jobs:
 
     - name: Update gh-pages repository
       run: |
-        # Konfiguracja użytkownika git
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-
         git clone --depth 1 --branch gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} gh-pages
-
         cd gh-pages
-
         cp ../${{ steps.addon_zip.outputs.zip_name }} .
 
-        cat > addons.xml << EOF
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addons>
-$(cat ../addon.xml)
+        # POPRAWKA: Użyto <<- zamiast << i dodano wcięcia do całego bloku
+        cat > addons.xml <<- EOF
+          <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+          <addons>
+          $(cat ../addon.xml)
 
-  <addon id="repository.docchipl"
-         name="Docchipl Repo"
-         version="${{ env.VERSION }}"
-         provider-name="skoruppa">
-    <extension point="xbmc.addon.repository" name="Docchipl Repo">
-      <info compressed="false">https://raw.githubusercontent.com/${{ github.repository }}/gh-pages/addons.xml</info>
-      <checksum>https://raw.githubusercontent.com/${{ github.repository }}/gh-pages/addons.xml.md5</checksum>
-      <datadir zip="true">https://raw.githubusercontent.com/${{ github.repository }}/gh-pages/</datadir>
-    </extension>
-    <extension point="xbmc.addon.metadata">
-      <summary>Repozytorium dla wtyczki Docchipl</summary>
-      <description>Repozytorium instalacyjne dla dodatków od skoruppa.</description>
-      <platform>all</platform>
-      <assets>
-        <icon>icon.png</icon>
-        <fanart>fanart.jpg</fanart>
-      </assets>
-    </extension>
-  </addon>
-</addons>
-EOF
+            <addon id="repository.docchipl"
+                   name="Docchipl Repo"
+                   version="${{ env.VERSION }}"
+                   provider-name="skoruppa">
+              <extension point="xbmc.addon.repository" name="Docchipl Repo">
+                <info compressed="false">https://raw.githubusercontent.com/${{ github.repository }}/gh-pages/addons.xml</info>
+                <checksum>https://raw.githubusercontent.com/${{ github.repository }}/gh-pages/addons.xml.md5</checksum>
+                <datadir zip="true">https://raw.githubusercontent.com/${{ github.repository }}/gh-pages/</datadir>
+              </extension>
+              <extension point="xbmc.addon.metadata">
+                <summary>Repozytorium dla wtyczki Docchipl</summary>
+                <description>Repozytorium instalacyjne dla dodatków od skoruppa.</description>
+                <platform>all</platform>
+                <assets>
+                  <icon>icon.png</icon>
+                  <fanart>fanart.jpg</fanart>
+                </assets>
+              </extension>
+            </addon>
+          </addons>
+        EOF
 
         md5sum addons.xml | awk '{print $1}' > addons.xml.md5
-
         git add .
         if git diff --staged --quiet; then
           echo "No changes in gh-pages to commit."
