@@ -125,12 +125,12 @@ jobs:
         REPO_ADDON_XML=$(unzip -p $REPO_ZIP_NAME */addon.xml)
 
         cat > addons.xml <<- EOF
-          <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-          <addons>
+        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <addons>
           $(sed '/<?xml/d' ../addon.xml)
 
           $(echo "${REPO_ADDON_XML}" | sed '/<?xml/d')
-          </addons>
+        </addons>
         EOF
 
         md5sum addons.xml | awk '{print $1}' > addons.xml.md5
