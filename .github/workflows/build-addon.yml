@@ -38,7 +38,7 @@ jobs:
 
     - name: Update addon.xml version
       run: |
-        sed -i "s/version=\"[^\"]*\"/version=\"${{ env.VERSION }}\"/" addon.xml
+        sed -i "/<addon/s/version=\"[^\"]*\"/version=\"${{ env.VERSION }}\"/" addon.xml
 
     - name: Update README.md version badge and zip example
       run: |
@@ -129,7 +129,7 @@ jobs:
           <addons>
           $(sed '/<?xml/d' ../addon.xml)
 
-          ${REPO_ADDON_XML}
+          $(echo "${REPO_ADDON_XML}" | sed '/<?xml/d')
           </addons>
         EOF
 

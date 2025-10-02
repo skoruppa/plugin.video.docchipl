@@ -1,4 +1,4 @@
-<?xml version="0.2.0" encoding="UTF-8" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="plugin.video.docchipl" name="Docchi.pl" version="0.2.0" provider-name="skoruppa">
   <requires>
     <import addon="xbmc.python" version="0.2.0"/>
