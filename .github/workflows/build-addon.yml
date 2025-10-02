@@ -99,6 +99,7 @@ jobs:
         rm -rf ./${ADDON_ID}
         rm -rf ./${REPO_ID}
         rm -f repository.docchipl-*.zip
+        rm -f repository.docchipl.zip
 
         mkdir -p ./${ADDON_ID}/resources
         mkdir -p ./${REPO_ID}
@@ -107,7 +108,7 @@ jobs:
         cp ../resources/icon.png ./${ADDON_ID}/resources/icon.png
         cp ../resources/fanart.jpg ./${ADDON_ID}/resources/fanart.jpg
 
-        REPO_ZIP_NAME="${REPO_ID}-${{ env.REPO_VERSION }}.zip"
+        REPO_ZIP_NAME_VERSIONED="${REPO_ID}-${{ env.REPO_VERSION }}.zip"
 
         cat > ./${REPO_ID}/addon.xml <<- EOF
         <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -133,9 +134,10 @@ jobs:
 
         cp ../resources/icon.png ./${REPO_ID}/icon.png
         cp ../resources/fanart.jpg ./${REPO_ID}/fanart.jpg
-        (cd ./${REPO_ID} && zip -r ../$REPO_ZIP_NAME .)
+        (cd ./${REPO_ID} && zip -r ../$REPO_ZIP_NAME_VERSIONED .)
         
-        cp $REPO_ZIP_NAME ./${REPO_ID}/
+        cp $REPO_ZIP_NAME_VERSIONED ./${REPO_ID}/
+        mv $REPO_ZIP_NAME_VERSIONED repository.docchipl.zip
 
         cat > addons.xml <<- EOF
         <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -156,8 +158,8 @@ jobs:
         <h1>Index of /</h1>
         <table>
         EOH
-        find . -type f | sed 's|^\./||' | while read -r filename; do
-          if [[ "$filename" != ".git" && "$filename" != "index.html" ]]; then
+        find . -type f | grep -v '/.git/' | sed 's|^\./||' | while read -r filename; do
+          if [[ "$filename" != "index.html" ]]; then
             echo "<tr><td><a href=\"$filename\">$filename</a></td></tr>" >> index.html
           fi
         done
