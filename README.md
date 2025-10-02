@@ -1,6 +1,6 @@
 # Docchi.pl Addon for Kodi
 
-![Version](https://img.shields.io/badge/version-0.1.9-blue.svg)
+![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Status](https://img.shields.io/badge/status-Active-brightgreen.svg)
 
@@ -22,7 +22,7 @@ An addon for Kodi that allows users to watch anime with Polish subtitles from th
 ## Installation
 
 1.  Navigate to the [**Releases**](https://github.com/skoruppa/plugin.video.docchipl/releases) section of this GitHub page.
-2.  Download the latest version of the addon as a `.zip` file (e.g., `plugin.video.docchipl-0.1.9.zip`).
+2.  Download the latest version of the addon as a `.zip` file (e.g., `plugin.video.docchipl-0.2.0.zip`).
 3.  Open Kodi and navigate to: **Add-ons -> Box icon (Add-on browser)**.
 4.  Select **Install from zip file**.
 5.  Locate the `.zip` file you just downloaded and confirm the installation.
