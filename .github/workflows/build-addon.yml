@@ -92,22 +92,26 @@ jobs:
       run: |
         git clone --depth 1 --branch gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} gh-pages
         cd gh-pages
-        
-        # POPRAWKA: Czyszczenie starych ZIP-ów wtyczki i repozytorium
-        rm -f plugin.video.docchipl-*.zip
-        rm -f repository.docchipl-*.zip
-        
-        cp ../${{ steps.addon_zip.outputs.zip_name }} .
 
+        ADDON_ID="plugin.video.docchipl"
         REPO_ID="repository.docchipl"
+
+        rm -rf ./${ADDON_ID}
+        rm -rf ./${REPO_ID}
+        rm -f repository.docchipl-*.zip
+
+        mkdir -p ./${ADDON_ID}/resources
+        mkdir -p ./${REPO_ID}
+
+        mv ../${{ steps.addon_zip.outputs.zip_name }} ./${ADDON_ID}/
+        cp ../resources/icon.png ./${ADDON_ID}/resources/icon.png
+        cp ../resources/fanart.jpg ./${ADDON_ID}/resources/fanart.jpg
+
         REPO_ZIP_NAME="${REPO_ID}-${{ env.REPO_VERSION }}.zip"
-        
-        echo "Generating repository ZIP: $REPO_ZIP_NAME"
-        mkdir -p $REPO_ID
-        
+
         cat > ./${REPO_ID}/addon.xml <<- EOF
         <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-        <addon id="repository.docchipl" name="Docchipl Repo" version="${{ env.REPO_VERSION }}" provider-name="skoruppa">
+        <addon id="${REPO_ID}" name="Docchipl Repo" version="${{ env.REPO_VERSION }}" provider-name="skoruppa">
             <extension point="xbmc.addon.repository" name="Docchipl Repo">
                 <dir minversion="19.0.0">
                     <info compressed="false">https://raw.githubusercontent.com/${{ github.repository }}/gh-pages/addons.xml</info>
@@ -127,10 +131,11 @@ jobs:
         </addon>
         EOF
 
+        cp ../resources/icon.png ./${REPO_ID}/icon.png
+        cp ../resources/fanart.jpg ./${REPO_ID}/fanart.jpg
+        (cd ./${REPO_ID} && zip -r ../$REPO_ZIP_NAME .)
         
-        cp ../resources/icon.png ./${REPO_ID}/icon.png || echo "Repo icon not found."
-        cp ../resources/fanart.jpg ./${REPO_ID}/fanart.jpg || echo "Repo fanart not found."
-        zip -r $REPO_ZIP_NAME $REPO_ID
+        cp $REPO_ZIP_NAME ./${REPO_ID}/
 
         cat > addons.xml <<- EOF
         <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -141,7 +146,6 @@ jobs:
         </addons>
         EOF
 
-        rm -rf $REPO_ID
         md5sum addons.xml | awk '{print $1}' > addons.xml.md5
 
         cat > index.html <<- EOH
@@ -152,8 +156,8 @@ jobs:
         <h1>Index of /</h1>
         <table>
         EOH
-        for filename in $(ls -1); do
-          if [[ "$filename" == *.zip || "$filename" == *.md5 || "$filename" == *.xml ]]; then
+        find . -type f | sed 's|^\./||' | while read -r filename; do
+          if [[ "$filename" != ".git" && "$filename" != "index.html" ]]; then
             echo "<tr><td><a href=\"$filename\">$filename</a></td></tr>" >> index.html
           fi
         done
@@ -167,6 +171,6 @@ jobs:
         if git diff --staged --quiet; then
           echo "No changes in gh-pages to commit."
         else
-          git commit -m "repo: Add/update addon version ${{ env.VERSION }} [skip ci]"
+          git commit -m "repo: Rebuild repository for version ${{ env.VERSION }} [skip ci]"
           git push
         fi
