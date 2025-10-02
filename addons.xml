@@ -1,0 +1,50 @@
+  <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  <addons>
+  <?xml version="0.2.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.video.docchipl" name="Docchi.pl" version="0.2.0" provider-name="skoruppa">
+  <requires>
+    <import addon="xbmc.python" version="0.2.0"/>
+    <import addon="script.module.requests"/>
+    <import addon="script.module.beautifulsoup4"/>
+    <import addon="script.module.pycryptodome"/>
+    <import addon="inputstream.adaptive" version="0.2.0" optional="true"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource" library="addon.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en_GB">Anime with Polish subtitles from Docchi.pl</summary>
+    <summary lang="pl_PL">Anime z polskimi napisami z serwisu Docchi.pl</summary>
+    <description lang="en_GB">Provides users with the possibility to watch anime with Polish subtitles based on data returned by Docchi.pl. This addon is a port of the Stremio addon and utilizes its core logic for fetching streams and metadata.</description>
+    <description lang="pl_PL">Umożliwia oglądanie anime z polskimi napisami, korzystając z danych serwisu Docchi.pl. Ten dodatek jest portem wtyczki dla Stremio i wykorzystuje jej główną logikę do pobierania streamów i metadanych.</description>
+    <disclaimer lang="en_GB">All content is provided by external sites.</disclaimer>
+    <disclaimer lang="pl_PL">Wszystkie materiały pochodzą z zewnętrznych serwisów.</disclaimer>
+    <platform>all</platform>
+    <license>MIT</license>
+    <assets>
+      <icon>resources/icon.png</icon>
+      <fanart>resources/fanart.jpg</fanart>
+    </assets>
+  </extension>
+</addon>
+
+    <addon id="repository.docchipl"
+           name="Docchipl Repo"
+           version="0.2.0"
+           provider-name="skoruppa">
+      <extension point="xbmc.addon.repository" name="Docchipl Repo">
+        <info compressed="false">https://raw.githubusercontent.com/skoruppa/plugin.video.docchipl/gh-pages/addons.xml</info>
+        <checksum>https://raw.githubusercontent.com/skoruppa/plugin.video.docchipl/gh-pages/addons.xml.md5</checksum>
+        <datadir zip="true">https://raw.githubusercontent.com/skoruppa/plugin.video.docchipl/gh-pages/</datadir>
+      </extension>
+      <extension point="xbmc.addon.metadata">
+        <summary>Repozytorium dla wtyczki Docchipl</summary>
+        <description>Repozytorium instalacyjne dla dodatków od skoruppa.</description>
+        <platform>all</platform>
+        <assets>
+          <icon>icon.png</icon>
+          <fanart>fanart.jpg</fanart>
+        </assets>
+      </extension>
+    </addon>
+  </addons>
