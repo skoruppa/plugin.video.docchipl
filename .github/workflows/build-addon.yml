@@ -160,7 +160,7 @@ jobs:
         <table>
         EOH
         for filename in *; do
-          if [[ -f "$filename" ]]; then
+          if [[ -f "$filename" && "$filename" != "index.html" ]]; then
             echo "<tr><td><a href=\"$filename\">$filename</a></td></tr>" >> index.html
           fi
         done
