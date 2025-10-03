@@ -159,8 +159,8 @@ jobs:
         <h1>Index of /</h1>
         <table>
         EOH
-        find . -type f | grep -v '/.git/' | sed 's|^\./||' | while read -r filename; do
-          if [[ "$filename" != "index.html" ]]; then
+        for filename in *; do
+          if [[ -f "$filename" ]]; then
             echo "<tr><td><a href=\"$filename\">$filename</a></td></tr>" >> index.html
           fi
         done
