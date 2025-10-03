@@ -135,7 +135,7 @@ jobs:
 
         cp ../resources/icon.png ./${REPO_ID}/icon.png
         cp ../resources/fanart.jpg ./${REPO_ID}/fanart.jpg
-        (cd ./${REPO_ID} && zip -r ../$REPO_ZIP_NAME_VERSIONED .)
+        zip -r ../$REPO_ZIP_NAME_VERSIONED ./${REPO_ID}
         
         cp $REPO_ZIP_NAME_VERSIONED ./${REPO_ID}/
         mv $REPO_ZIP_NAME_VERSIONED repository.docchipl.zip
