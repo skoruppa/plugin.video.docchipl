@@ -100,8 +100,7 @@ jobs:
 
         rm -rf ./${ADDON_ID}
         rm -rf ./${REPO_ID}
-        rm -f repository.docchipl-*.zip
-        rm -f repository.docchipl.zip
+        rm -f *.zip
 
         mkdir -p ./${ADDON_ID}/resources
         mkdir -p ./${REPO_ID}
