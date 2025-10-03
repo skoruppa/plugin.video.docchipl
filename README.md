@@ -21,9 +21,36 @@ An addon for Kodi that allows users to watch anime with Polish subtitles from th
 
 ## Installation
 
+There are two installation methods: the recommended one (using the repository for automatic updates) and a manual one (for a single installation).
+
+### Recommended Installation (from the Docchipl Repository)
+
+This method is recommended as it provides **automatic updates** for the addon whenever a new version is released. It's a two-step process: first, you install the repository, and then you install the addon from it.
+
+#### Step 1: Install the Docchipl Repository
+
+1.  Download the repository ZIP file by clicking the link below:
+    *   [**repository.docchipl.zip**](https://skoruppa.github.io/plugin.video.docchipl/repository.docchipl.zip)
+2.  Open Kodi and navigate to: **Add-ons -> Add-on browser (the box icon)**.
+3.  Select **Install from zip file**.
+4.  Locate the downloaded `repository.docchipl.zip` file and confirm the installation.
+5.  Wait for the notification confirming the repository has been installed successfully.
+
+#### Step 2: Install the Docchi.pl Addon
+
+1.  In the same Add-on browser, select **Install from repository**.
+2.  Select **Docchipl Repo** from the list.
+3.  Go to the **Video add-ons** category.
+4.  Select **Docchi.pl** from the list and click **Install**.
+5.  After a moment, the addon will be installed and available in **Add-ons -> Video add-ons**.
+
+### Alternative Method (Manual Installation from ZIP file)
+
+You can install the addon manually, but please note that this method **does not provide automatic updates**.
+
 1.  Navigate to the [**Releases**](https://github.com/skoruppa/plugin.video.docchipl/releases) section of this GitHub page.
 2.  Download the latest version of the addon as a `.zip` file (e.g., `plugin.video.docchipl-0.2.0.zip`).
-3.  Open Kodi and navigate to: **Add-ons -> Box icon (Add-on browser)**.
+3.  Open Kodi and navigate to: **Add-ons -> Add-on browser (the box icon)**.
 4.  Select **Install from zip file**.
 5.  Locate the `.zip` file you just downloaded and confirm the installation.
 6.  After a moment, the addon will be installed and available in **Add-ons -> Video add-ons**.
