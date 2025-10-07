@@ -29,11 +29,11 @@ This method is recommended as it provides **automatic updates** for the addon wh
 
 #### Step 1: Install the Docchipl Repository
 
-1.  Download the repository ZIP file by clicking the link below:
+1.  Add `skoruppa.github.io/plugin.video.docchipl` as a file manager's source or download the repository ZIP file by clicking the link below:
     *   [**repository.docchipl.zip**](https://skoruppa.github.io/plugin.video.docchipl/repository.docchipl.zip)
 2.  Open Kodi and navigate to: **Add-ons -> Add-on browser (the box icon)**.
 3.  Select **Install from zip file**.
-4.  Locate the downloaded `repository.docchipl.zip` file and confirm the installation.
+4.  Select the added source or locate the downloaded `repository.docchipl.zip` file and confirm the installation.
 5.  Wait for the notification confirming the repository has been installed successfully.
 
 #### Step 2: Install the Docchi.pl Addon
