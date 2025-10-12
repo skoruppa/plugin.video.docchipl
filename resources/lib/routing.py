@@ -26,6 +26,7 @@ from .players import cda, okru, sibnet, dailymotion, vk, uqload, gdrive, streamt
 
 PLAYER_MAPPING = {
     'cda': cda.get_video_from_cda_player, 'ok': okru.get_video_from_okru_player,
+    'okru': okru.get_video_from_okru_player,
     'sibnet': sibnet.get_video_from_sibnet_player, 'dailymotion': dailymotion.get_video_from_dailymotion_player,
     'uqload': uqload.get_video_from_uqload_player, 'vk': vk.get_video_from_vk_player,
     'gdrive': gdrive.get_video_from_gdrive_player, 'google drive': gdrive.get_video_from_gdrive_player,
