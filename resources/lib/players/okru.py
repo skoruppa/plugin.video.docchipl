@@ -29,7 +29,7 @@ def process_video_json(video_json):
     return highest_quality_video['url'], f"{highest_quality_video['quality']}p"
 
 def get_video_from_okru_player(url):
-    user_agent = get_random_agent()
+    user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:143.0) Gecko/20100101 Firefox/143.0"
     headers = {"User-Agent": user_agent}
     video_headers = {
         "request": {
