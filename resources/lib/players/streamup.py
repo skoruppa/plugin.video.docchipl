@@ -9,7 +9,7 @@ from ..utils import get_random_agent
 from .utils import fetch_resolution_from_m3u8
 
 
-def decode_printable_95(encoded_hex_string: str, shift: int) -> str:
+def decode_printable_95(encoded_hex_string: str, shift: int):
     """
     Tłumaczy logikę funkcji JavaScript decodePrintable95 na język Python.
     """
