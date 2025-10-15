@@ -133,7 +133,7 @@ def extract_video_alternative_method(html_content):
 
 
 def get_video_from_vk_player(url):
-    user_agent = get_random_agent()
+    user_agent = get_random_agent("firefox")
 
     request_headers = {
         "User-Agent": user_agent,
