@@ -234,13 +234,15 @@ def list_streams(slug, episode, title):
             label_inverted = f"[{stream['hosting'].upper()}] [{stream['quality']}] - {stream['translator']} (Inverted)"
             li_inverted = xbmcgui.ListItem(label=label_inverted)
             li_inverted.setProperty('IsPlayable', 'true')
-            shader_path = xbmcaddon.Addon().getAddonInfo('path') + '/resources/shaders/invert_colors.glsl'
-            li_inverted.setProperty('videoplayer.rendermethod', 'shader')
-            li_inverted.setProperty('videoplayer.shader', shader_path)
-            if '.m3u8' in stream['url']:
-                li_inverted.setProperty("inputstream", "inputstream.adaptive")
-                li_inverted.setProperty("inputstream.adaptive.manifest_type", "hls")
-            xbmcplugin.addDirectoryItem(handle=ADDON_HANDLE, url=final_url, listitem=li_inverted, isFolder=False)
+            li_inverted.setProperty('inputstream', 'inputstream.ffmpegdirect')
+            li_inverted.setProperty('inputstream.ffmpegdirect.stream_mode', 'default')
+            li_inverted.setProperty('inputstream.ffmpegdirect.open_mode', 'ffmpeg')
+            li_inverted.setProperty('inputstream.ffmpegdirect.video_filter', 'negate')
+            if stream.get('headers') and stream['headers'].get('request'):
+                final_url_inverted = f"{stream['url']}|{urlencode(stream['headers']['request'])}"
+            else:
+                final_url_inverted = stream['url']
+            xbmcplugin.addDirectoryItem(handle=ADDON_HANDLE, url=final_url_inverted, listitem=li_inverted, isFolder=False)
     xbmcplugin.setContent(ADDON_HANDLE, "videos")
     xbmcplugin.endOfDirectory(ADDON_HANDLE)
 
@@ -356,6 +358,7 @@ def router():
         list_episodes(params.get('slug'), params.get('kitsu_id'), params.get('media_type'))
     elif mode == 'list_streams':
         list_streams(params.get('slug'), params.get('episode'), params.get('title'))
+
     elif mode == 'search':
         search()
     elif mode == 'display_search_results':
