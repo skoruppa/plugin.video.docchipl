@@ -6,11 +6,12 @@
     <import addon="script.module.beautifulsoup4"/>
     <import addon="script.module.pycryptodome"/>
     <import addon="inputstream.adaptive" version="2.4.0" optional="true"/>
-    <import addon="inputstream.ffmpegdirect" version="1.0.0" optional="true"/>
+
   </requires>
   <extension point="xbmc.python.pluginsource" library="addon.py">
     <provides>video</provides>
   </extension>
+
   <extension point="xbmc.addon.metadata">
     <summary lang="en_GB">Anime with Polish subtitles from Docchi.pl</summary>
     <summary lang="pl_PL">Anime z polskimi napisami z serwisu Docchi.pl</summary>

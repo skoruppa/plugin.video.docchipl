@@ -52,7 +52,6 @@ def _process_player(player):
     player_hosting = player['player_hosting'].lower()
     player_url = player['player']
     translator = player['translator_title'] or "Unknown"
-    is_inverted = player.get('isInverted', False)
     resolver_func = PLAYER_MAPPING.get(player_hosting)
     if not resolver_func and player_hosting == 'default':
         for key, func in DEFAULT_PLAYER_MAPPING.items():
@@ -64,7 +63,7 @@ def _process_player(player):
             url, quality, headers = resolver_func(player_url)
             if url:
                 return {'url': url, 'quality': quality or 'unknown', 'hosting': player_hosting,
-                        'translator': translator, 'headers': headers, 'is_inverted': is_inverted}
+                        'translator': translator, 'headers': headers}
         except Exception as e:
             log(f"Error processing player {player_hosting}: {e}", xbmc.LOGERROR)
     return None
@@ -229,20 +228,7 @@ def list_streams(slug, episode, title):
             final_url = f"{final_url}|{urlencode(stream['headers']['request'])}"
         xbmcplugin.addDirectoryItem(handle=ADDON_HANDLE, url=final_url, listitem=li, isFolder=False)
         
-        # Add inverted stream for VK player
-        if stream['hosting'] == 'vk':
-            label_inverted = f"[{stream['hosting'].upper()}] [{stream['quality']}] - {stream['translator']} (Inverted)"
-            li_inverted = xbmcgui.ListItem(label=label_inverted)
-            li_inverted.setProperty('IsPlayable', 'true')
-            li_inverted.setProperty('inputstream', 'inputstream.ffmpegdirect')
-            li_inverted.setProperty('inputstream.ffmpegdirect.stream_mode', 'default')
-            li_inverted.setProperty('inputstream.ffmpegdirect.open_mode', 'ffmpeg')
-            li_inverted.setProperty('inputstream.ffmpegdirect.video_filter', 'negate')
-            if stream.get('headers') and stream['headers'].get('request'):
-                final_url_inverted = f"{stream['url']}|{urlencode(stream['headers']['request'])}"
-            else:
-                final_url_inverted = stream['url']
-            xbmcplugin.addDirectoryItem(handle=ADDON_HANDLE, url=final_url_inverted, listitem=li_inverted, isFolder=False)
+
     xbmcplugin.setContent(ADDON_HANDLE, "videos")
     xbmcplugin.endOfDirectory(ADDON_HANDLE)
 
