@@ -1,6 +1,6 @@
 # Docchi.pl Addon for Kodi
 
-![Version](https://img.shields.io/badge/version-0.2.3.4-blue.svg)
+![Version](https://img.shields.io/badge/version-0.2.4-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Status](https://img.shields.io/badge/status-Active-brightgreen.svg)
 
@@ -49,7 +49,7 @@ This method is recommended as it provides **automatic updates** for the addon wh
 You can install the addon manually, but please note that this method **does not provide automatic updates**.
 
 1.  Navigate to the [**Releases**](https://github.com/skoruppa/plugin.video.docchipl/releases) section of this GitHub page.
-2.  Download the latest version of the addon as a `.zip` file (e.g., `plugin.video.docchipl-0.2.3.4.zip`).
+2.  Download the latest version of the addon as a `.zip` file (e.g., `plugin.video.docchipl-0.2.4.zip`).
 3.  Open Kodi and navigate to: **Add-ons -> Add-on browser (the box icon)**.
 4.  Select **Install from zip file**.
 5.  Locate the `.zip` file you just downloaded and confirm the installation.
