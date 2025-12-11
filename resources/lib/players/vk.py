@@ -5,16 +5,18 @@ import requests
 from ..utils import get_random_agent
 
 VK_URL = "https://vk.com"
+VK_API_URL = "https://vk.com/al_video.php?act=show"
 
 
 def handle_waf_challenge(session, url, request_headers):
     try:
         response = session.get(url, headers=request_headers)
-        if str(response.url).startswith('https://vk.com/429.html?'):
+        response_url = str(response.url)
+        if response_url.startswith('https://vk.com/429.html?') or response.status_code == 429:
             hash429_cookie = session.cookies.get('hash429')
             if hash429_cookie:
                 hash429 = hashlib.md5(hash429_cookie.encode('ascii')).hexdigest()
-                challenge_url = f"{response.url}&key={hash429}"
+                challenge_url = f"{response_url}&key={hash429}"
                 session.get(challenge_url, headers=request_headers)
                 new_response = session.get(url, headers=request_headers)
                 return new_response.text
@@ -35,13 +37,73 @@ def extract_video_id(url):
         if match:
             if len(match.groups()) == 2:
                 return f"{match.group(1)}_{match.group(2)}"
-            else:  # videoid
+            else:
                 return match.group(1)
 
     return None
 
 
+def get_video_via_api(session, video_id, user_agent):
+    headers = {
+        "User-Agent": user_agent,
+        "Referer": f"{VK_URL}/",
+        "Origin": VK_URL,
+        "Content-Type": "application/x-www-form-urlencoded",
+        "X-Requested-With": "XMLHttpRequest"
+    }
+
+    data = {
+        'act': 'show',
+        'al': '1',
+        'video': video_id
+    }
+
+    try:
+        response = session.post(VK_API_URL, data=data, headers=headers)
+        text = response.text
+        if text.startswith('<!--'):
+            text = text[4:]
+
+        try:
+            js_data = json.loads(text)
+            payload = js_data.get('payload')
+
+            player_params = None
+            if isinstance(payload, list):
+                def find_player(obj):
+                    if isinstance(obj, dict):
+                        if 'player' in obj and 'params' in obj['player']:
+                            return obj['player']
+                        for v in obj.values():
+                            res = find_player(v)
+                            if res: return res
+                    elif isinstance(obj, list):
+                        for v in obj:
+                            res = find_player(v)
+                            if res: return res
+                    return None
+
+                player_data = find_player(payload)
+                if player_data:
+                    player_params = {'params': player_data.get('params')}
+
+            if player_params:
+                return extract_from_player_params(player_params)
+        except json.JSONDecodeError:
+            pass
+    except Exception:
+        pass
+
+    return None, None
+
+
 def extract_highest_quality_video(html_content):
+    files_data = extract_files_section(html_content)
+    if files_data:
+        video_url, quality = extract_from_player_params({'params': files_data})
+        if video_url:
+            return video_url, quality
+
     player_params = extract_player_params(html_content)
     if player_params:
         video_url, quality = extract_from_player_params(player_params)
@@ -53,6 +115,26 @@ def extract_highest_quality_video(html_content):
         return video_url, quality
 
     return None, None
+
+
+def extract_files_section(html_content):
+    search_str = '"files":'
+    start_pos = html_content.find(search_str)
+
+    while start_pos != -1:
+        json_start = html_content.find('{', start_pos)
+        if json_start != -1:
+            try:
+                files_obj, _ = json.JSONDecoder().raw_decode(html_content[json_start:])
+
+                if any(k.startswith('mp4') or k.startswith('hls') for k in files_obj.keys()):
+                    return files_obj
+            except json.JSONDecodeError:
+                pass
+
+        start_pos = html_content.find(search_str, start_pos + 1)
+
+    return None
 
 
 def extract_player_params(html_content):
@@ -82,31 +164,47 @@ def extract_player_params(html_content):
 
 
 def extract_from_player_params(player_params):
-    if not player_params or 'params' not in player_params:
+    if not player_params:
         return None, None
 
-    params = player_params['params']
-    if not params or not isinstance(params, list) or len(params) == 0:
-        return None, None
+    if 'params' in player_params:
+        params = player_params['params']
+        if isinstance(params, list) and len(params) > 0:
+            data = params[0]
+        elif isinstance(params, dict):
+            data = params
+        else:
+            return None, None
+    else:
+        data = player_params
 
-    data = params[0]
     best_url = None
     best_height = 0
+    hls_url = None
 
     for format_id, format_url in data.items():
         if not isinstance(format_url, str) or not format_url.startswith(('http', '//', 'rtmp')):
             continue
 
-        if format_id.startswith(('url', 'cache')):
-            height_match = re.search(r'^(?:url|cache)(\d+)', format_id)
+        if format_id.startswith(('url', 'cache', 'mp4')):
+            height_match = re.search(r'(\d+)$', format_id)
+            if not height_match:
+                height_match = re.search(r'_(\d+)', format_id)
+
             if height_match:
                 height = int(height_match.group(1))
                 if height > best_height:
                     best_height = height
                     best_url = format_url
 
+        if format_id in ['hls', 'hls_live', 'hls_ondemand']:
+            hls_url = format_url
+
     if best_url:
         return best_url, str(best_height)
+
+    if hls_url:
+        return hls_url, 'HLS'
 
     return None, None
 
@@ -129,7 +227,6 @@ def extract_video_alternative_method(html_content):
                 return url, quality
 
     return None, None
-
 
 
 def get_video_from_vk_player(url):
@@ -159,7 +256,17 @@ def get_video_from_vk_player(url):
     }
 
     video_id = extract_video_id(url)
-    if not video_id: return None, None, None
+    if not video_id:
+        return None, None, None
+
+    session = requests.Session()
+
+    video_url, quality = get_video_via_api(session, video_id, user_agent)
+
+    if video_url:
+        video_url = video_url.replace("^", "")
+        quality_str = f'{quality}p' if quality != 'HLS' else 'HLS'
+        return video_url, quality_str, video_headers
 
     if "video_ext" in url:
         embed_url = url
@@ -175,18 +282,20 @@ def get_video_from_vk_player(url):
     if "autoplay=0" not in embed_url:
         embed_url += "&autoplay=0"
 
-    session = requests.Session()
     try:
         html_content = handle_waf_challenge(session, embed_url, request_headers)
         if not html_content:
             response = session.get(embed_url, headers=request_headers, timeout=30)
-            if response.status_code != 200: return None, None, None
+            if response.status_code != 200:
+                return None, None, None
             html_content = response.text
-            
+
         video_url, quality = extract_highest_quality_video(html_content)
-        video_url = video_url.replace("^", "")
+
         if video_url:
-            return video_url, f'{quality}p', video_headers
+            video_url = video_url.replace("^", "")
+            quality_str = f'{quality}p' if quality != 'HLS' else 'HLS'
+            return video_url, quality_str, video_headers
         else:
             return None, None, None
     except Exception as e:
