@@ -98,4 +98,4 @@ If you encounter any issues, please report them in the [**Issues**](https://gith
 
 ## Support 🤝
 
-If you want to thank me for the addon, you can [**buy me a coffe**](https://buycoffee.to/skoruppa) 
+If you want to thank me for the addon, you can [**buy me a coffe**](https://buymeacoffee.com/skoruppa) 
